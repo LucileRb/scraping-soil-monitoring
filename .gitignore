@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+notebooks/
+article/
+data/
+.vscode/
