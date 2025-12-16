@@ -19,3 +19,4 @@ matplotlib-3.9.4
 pillow-11.1.0
 pyparsing-3.2.1
 seaborn-0.13.2
+streamlit
