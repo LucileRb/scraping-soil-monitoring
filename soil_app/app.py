@@ -1,17 +1,11 @@
 ################################################################################################ IMPORTS ################################################################################################
-import base64
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
-import os
-import shap
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
-import requests
 import pyarrow.parquet as pq
-import json
 
 ################################################################################################ FONCTIONS ################################################################################################
 
