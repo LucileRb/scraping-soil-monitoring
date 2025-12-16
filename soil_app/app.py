@@ -40,7 +40,7 @@ if app_mode == 'Home':
     st.divider()
     st.subheader("Hello, gnagnagnagnagnagnagnagnagnagnagnagna - mettre abstract de l'article ici ? ou au moins résumé / explication de l'outils")
     st.divider()
-    st.image('scoring_app/app_illustrations/paying-off-a-loan-early.jpg')
+    st.image('soil_app/app_illustrations/AOE-Blog-Organic-Soil.webp')
 
     # à défaut d'afficher infos sur jeu de données, décrire les features utilisées:
     st.subheader("Liste des descripteurs utilisés pour prédire gnagna :")
