@@ -41,15 +41,15 @@ elif app_mode == 'Pokedex':
     st.title('POKEDEX')
 
 elif app_mode == 'Decision tool':
-    st.title('OUTILS DE PREDICTION')
+    st.title('DECISION TOOL')
     st.divider()
     phrase = '''
-    Bonjour,
-    merci de remplir les informations suivantes à propos du client afin de déterminer si nous devons acceder à sa demande de prêt
+    Hello,
+    Please select the correct infos below to blablabla truc much
     '''
     st.subheader(phrase)
     st.divider()
 
-    st.sidebar.header('Informations à propos du nouveau client:')
+    st.sidebar.header('MRVs infos:')
 
 ################################################################################################ END ################################################################################################
