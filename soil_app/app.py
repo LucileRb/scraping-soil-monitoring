@@ -127,7 +127,7 @@ elif app_mode == 'Decision tool':
     Occupation_Others_Precision = st.sidebar.text_input('Occupation : Please write it with a capital letter and a "_" between words:')
 
     st.write("- Cost")
-    Cost_MRV = st.sidebar.number_input("Please insert a number", value=None, placeholder="Type a number...")
+    Cost_MRV = st.sidebar.number_input("Cost : Please insert a number", value=None, placeholder="Type a number...")
     Cost_Unit = st.sidebar.text_input('Please indicate the unit i.e. the currency:')
 
     st.sidebar.header('Monitoring:')
@@ -159,7 +159,7 @@ elif app_mode == 'Decision tool':
     Data_Modelling = st.sidebar.selectbox("Data Modelling", options_y_n)
 
     st.write("- Sampling design")
-    Plot_Area = st.sidebar.number_input("Please insert a number", value=None, placeholder="Type a number...")
+    Plot_Area = st.sidebar.number_input("Plot area : Please insert a number", value=None, placeholder="Type a number...")
     Plot_Area_Unit = st.sidebar.text_input('Please indicate the spatial unit i.e. hectares, km2, etc.:')
     Monitoring_frequency = st.sidebar.selectbox('Monitoring frequency', ('Less_5_years', '5_10_years', '10_15_years', 'More_15_years'))
     Methodology_Standard = st.sidebar.selectbox("Methodology Standard", options_y_n)
