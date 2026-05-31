@@ -100,7 +100,7 @@ elif app_mode == 'Decision tool':
     Land_Use_Forest = st.sidebar.selectbox("Land Use Forest", options_y_n)
     Land_Use_Urban = st.sidebar.selectbox("Land Use Urban", options_y_n)
     Land_Use_Others = st.sidebar.selectbox("Land Use Others", options_y_n)
-    Land_Use_Others_Precision = st.sidebar.text_input('Please write it with a capital letter and a "_" between words:')
+    Land_Use_Others_Precision = st.sidebar.text_input('Land use : Please write it with a capital letter and a "_" between words:')
 
     st.write("- Scale")
     Scale_Local = st.sidebar.selectbox("Scale Local", options_y_n)
@@ -111,8 +111,8 @@ elif app_mode == 'Decision tool':
 
     st.write("- Purpose and driver")
     Purpose = st.sidebar.selectbox('Purpose', ('Certification', 'Compliance_carbon_market', 'Voluntary_carbon_market', 'Other'))
-    Puprose_Others_Precision = st.sidebar.text_input('Please write it with a capital letter and a "_" between words:')
-    Driver = st.sidebar.text_input('Please write it with a capital letter and a "_" between words:')
+    Puprose_Others_Precision = st.sidebar.text_input('Purpose : Please write it with a capital letter and a "_" between words:')
+    Driver = st.sidebar.text_input('Driver : Please write it with a capital letter and a "_" between words:')
 
     st.write("- Occupation")
     Occupation_Farmers = st.sidebar.selectbox("Occupation Farmers", options_y_n)
@@ -124,7 +124,7 @@ elif app_mode == 'Decision tool':
     Occupation_Forestry_Companies = st.sidebar.selectbox("Occupation Forestry Companies", options_y_n)
     Occupation_Consultancy = st.sidebar.selectbox("Occupation Consultancy", options_y_n)
     Occupation_Others = st.sidebar.selectbox("Occupation Others", options_y_n)
-    Occupation_Others_Precision = st.sidebar.text_input('Please write it with a capital letter and a "_" between words:')
+    Occupation_Others_Precision = st.sidebar.text_input('Occupation : Please write it with a capital letter and a "_" between words:')
 
     st.write("- Cost")
     Cost_MRV = st.sidebar.number_input("Please insert a number", value=None, placeholder="Type a number...")
@@ -150,7 +150,7 @@ elif app_mode == 'Decision tool':
     Parameter_Pollutant_concentration = st.sidebar.selectbox("Parameter Pollutant concentration", options_y_n)
     Parameter_Soil_depth = st.sidebar.selectbox("Parameter Soil depth", options_y_n)
     Parameter_Others = st.sidebar.selectbox("Parameter Others", options_y_n)
-    Parameter_Others_Precision = st.sidebar.text_input('PPlease write it with a capital letter and a "_" between words:')
+    Parameter_Others_Precision = st.sidebar.text_input('Parameter : Please write it with a capital letter and a "_" between words:')
 
     st.write("- Data type")
     Data_Land_Management = st.sidebar.selectbox("Data Land Management", options_y_n)
