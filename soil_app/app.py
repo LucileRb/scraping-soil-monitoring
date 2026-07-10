@@ -366,8 +366,9 @@ def render_mrv_details(mrv_data, is_fr=True):
             st.markdown(f"- {t('Tourbière / Zone Humide :', 'Peatland / Wetland:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Peatland_Wetland', 'No'), is_fr)}</span>", unsafe_allow_html=True)
             if mrv_data.get('Land_use_Others_ Precision') and str(mrv_data['Land_use_Others_ Precision']).lower() != 'nan':
                 st.write(f"- {t('Autres détails :', 'Other details:')} *{mrv_data['Land_use_Others_ Precision']}*")
-                
-            st.markdown(f'<div class="section-header">{t("Échelle d'Application", "Application Scale")}</div>', unsafe_allow_html=True)
+            
+            label_fr = "Échelle d'Application"
+            st.markdown(f"<div class='section-header'>{t(label_fr, 'Application Scale')}</div>", unsafe_allow_html=True)
             st.markdown(f"- {t('Locale :', 'Local:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Local') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Local') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Local', 'No'), is_fr)}</span>", unsafe_allow_html=True)
             st.markdown(f"- {t('Régionale :', 'Regional:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Regional') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Regional') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Regional', 'No'), is_fr)}</span>", unsafe_allow_html=True)
             st.markdown(f"- {t('Nationale :', 'National:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_National') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_National') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_National', 'No'), is_fr)}</span>", unsafe_allow_html=True)
