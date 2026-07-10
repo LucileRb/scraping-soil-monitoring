@@ -431,7 +431,8 @@ def render_mrv_details(mrv_data, is_fr=True):
             st.markdown(f"- {t('Modélisation :', 'Modelling:')} {translate_val(mrv_data.get('Data_Modelling', 'No'), is_fr)}")
             st.markdown(f"- {t('Scanner de sol (site) :', 'On-site scanner imagery:')} {translate_val(mrv_data.get('Data_on_site_images', 'No'), is_fr)}")
             
-            st.markdown(f"<div class='section-header'>{t('Plan d\'Échantillonnage', 'Sampling Plan')}</div>", unsafe_allow_html=True)
+            label_fr = "Plan d'Échantillonnage"
+            st.markdown(f"<div class='section-header'>{t(label_fr, 'Sampling Plan')}</div>", unsafe_allow_html=True)
             st.write(f"**{t('Fréquence de suivi :', 'Monitoring frequency:')}** {translate_val(mrv_data['Monitoring_frequency'], is_fr)}")
             st.write(f"**{t('Superficie moyenne de parcelle :', 'Average plot area:')}** {mrv_data.get('Plot_Area', 'N/A')} {mrv_data.get('Plot_Area_Unit', '')}")
             st.write(f"**{t('Méthodologie standardisée :', 'Standardized methodology:')}** {translate_val(mrv_data.get('Methodology_Standard', 'No'), is_fr)}")
