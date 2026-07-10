@@ -48,6 +48,8 @@ scraping-soil-monitoring/
 
 ## Streamlit Application (`soil_app`)
 The Streamlit application provides a premium, dark-themed dashboard designed to help researchers and decision-makers browse and compare MRV protocols:
+- **🌐 Bilingual Support**:
+  - A dynamic selector in the sidebar allows you to switch between **Français** and **English** on the fly, translating all filters, charts, guide descriptions, metadata, and Pokemon Card statistics.
 - **🏠 Home Page**:
   - Displays high-level database metrics (Total frameworks, count per source category).
   - Framework distribution charts based on **Land Use** and **Spatial Scale** (matplotlib/seaborn plots).
@@ -55,14 +57,20 @@ The Streamlit application provides a premium, dark-themed dashboard designed to 
   - Grid-based uniform **Soil Illustration Gallery** showcasing landscape visuals.
 - **🔎 Decision Tool**:
   - Sidebar filters for searching based on search mode (Matching score vs. Strict filtering), Land Uses, Scales, Purpose, Measured Parameters, Data Types, and Verification/Auditing schemes.
-  - Generates detailed, interactive spec profiles for any selected framework divided across 4 semantic tabs:
-    - *General & Source*
-    - *Context & Stakeholders*
-    - *Monitoring*
-    - *Reporting & Verification*
+  - Excludes variables with >30% missing data (`Auditor`, `Data Sharing`, `Uncertainty`, `Threshold`) from active filtering to avoid categorical statistical bias, while keeping them transparently displayed in the profile.
+  - Generates detailed, interactive spec profiles for any selected framework in a split-screen container:
+    - **Left Column**: The custom **Pokemon Card** of the selected protocol.
+    - **Right Column**: Semantically divided technical specs tabs (*General & Source*, *Context & Stakeholders*, *Monitoring*, *Reporting & Verification*).
 - **🗂️ Pokedex (MRV Explorer)**:
   - Select any of the 96 frameworks to see it modeled as a custom, gaming-style **Pokemon Card**!
-  - The card displays status characteristics (Implementation, Auditor, Data Sharing, Threshold) in a technical specs box, alongside stats, weaknesses, resistance, retreat cost, and abilities representing Land Uses, Scales, Parameters, and Data Types.
+  - **Refined Card Structure**:
+    - **Top-Right Value**: Displays the unique MRV ID (e.g. `MRV5 🌱`) instead of HP.
+    - **Center Specs Box (Context)**: Shows Land Uses, Scales, Purpose, and Status.
+    - **Three MRV Abilities**:
+      1. *Monitoring Component*: Measured parameters and data types.
+      2. *Reporting Component*: Report format and baseline thresholds.
+      3. *Verification Component*: Verification scheme and auditor type.
+    - **Card Footer**: Showcases key categorical metrics (**Status**, **Source**, and **Country**).
 - **📚 Articles (Bibliography)**:
   - Search and browse unique publications and platforms associated with the database. Includes external source links and collapsible dropdowns revealing all MRV frameworks linked to each paper.
 - **📊 MRV Guide**:

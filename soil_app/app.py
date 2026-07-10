@@ -102,75 +102,151 @@ def calculate_hp(mrv_data):
             yes_count += 1
     return min(60 + yes_count * 10, 150)
 
-def generate_pokemon_card_html(mrv_data):
+def translate_val(val, is_fr):
+    if not is_fr:
+        return val
+    mapping = {
+        'Implemented': 'Implémenté',
+        'implemented': 'Implémenté',
+        'Project': 'Projet',
+        'project': 'Projet',
+        'Internal': 'Interne',
+        'External': 'Externe',
+        'Yes': 'Oui',
+        'No': 'Non',
+        'Literature (Scopus)': 'Littérature (Scopus)',
+        'AI Search': 'Recherche IA',
+        'Webscraping': 'Webscraping',
+        'Unknown': 'Inconnu',
+        'All': 'Tous',
+        'Depends/Flexible': 'Dépend/Flexible'
+    }
+    return mapping.get(str(val), val)
+
+def generate_pokemon_card_html(mrv_data, is_fr=True):
     """
     Génère le code HTML complet pour afficher un framework MRV sous la forme
-    d'une carte Pokemon personnalisée avec un encadré de caractéristiques techniques au lieu d'une image.
+    d'une carte Pokemon personnalisée avec un encadré de caractéristiques techniques.
     """
     src = mrv_data.get('Source', 'AI Search')
-    hp = calculate_hp(mrv_data)
     
     if src == 'Literature (Scopus)':
         card_type = 'grass'
         type_emoji = '🌱'
         energy_cost_2 = '🌱🌱'
+        energy_cost_3 = '🌱🌱🌱'
     elif src == 'Webscraping':
         card_type = 'water'
         type_emoji = '💧'
         energy_cost_2 = '💧💧'
+        energy_cost_3 = '💧💧💧'
     else:
         card_type = 'psychic'
         type_emoji = '🔮'
         energy_cost_2 = '🔮🔮'
+        energy_cost_3 = '🔮🔮🔮'
         
-    # Usages (English)
+    # Usages (Localize labels if necessary, but DB values are Yes/No)
     land_uses = []
-    for lu_label, col in [('Agriculture', 'Land_use_Agriculture'), ('Forest', 'Land_use_Forest'), ('Urban', 'Land_use_Urban'), ('Degraded', 'Land_use_Degraded_land'), ('Wetland', 'Land_use_Peatland_Wetland')]:
+    lu_names = [
+        ('Agriculture', 'Land_use_Agriculture'),
+        ('Forêt' if is_fr else 'Forest', 'Land_use_Forest'),
+        ('Urbain' if is_fr else 'Urban', 'Land_use_Urban'),
+        ('Dégradé' if is_fr else 'Degraded', 'Land_use_Degraded_land'),
+        ('Zones Humides' if is_fr else 'Wetland', 'Land_use_Peatland_Wetland')
+    ]
+    for lu_lbl, col in lu_names:
         if mrv_data.get(col) == 'Yes':
-            land_uses.append(lu_label)
-    land_uses_str = ", ".join(land_uses) if land_uses else "None"
+            land_uses.append(lu_lbl)
+    land_uses_str = ", ".join(land_uses) if land_uses else ("Aucun" if is_fr else "None")
     
-    # Échelles (English)
+    # Échelles
     scales = []
-    for sc_label, col in [('Local', 'Scale_Local'), ('Regional', 'Scale_Regional'), ('National', 'Scale_National'), ('Global', 'Scale_Global')]:
+    scale_names = [
+        ('Locale' if is_fr else 'Local', 'Scale_Local'),
+        ('Régionale' if is_fr else 'Regional', 'Scale_Regional'),
+        ('Nationale' if is_fr else 'National', 'Scale_National'),
+        ('Continentale' if is_fr else 'Continental', 'Scale_Continental'),
+        ('Globale' if is_fr else 'Global', 'Scale_Global')
+    ]
+    for sc_lbl, col in scale_names:
         if mrv_data.get(col) == 'Yes':
-            scales.append(sc_label)
-    scales_str = ", ".join(scales) if scales else "None"
+            scales.append(sc_lbl)
+    scales_str = ", ".join(scales) if scales else ("Aucune" if is_fr else "None")
     
-    # Paramètres (English)
+    # 1. Monitoring Component (Parameters & Data Types)
     params = []
-    for p_label, col in [('SOC', 'Parameter_Soil_organic_matter_SOC'), ('pH', 'Parameter_Soil_pH'), ('Moisture', 'Parameter_Soil_moisture'), ('Temperature', 'Parameter_Soil_temperature'), ('Microorg.', 'Parameter_Soil_Microorganisms'), ('GHG', 'Parameter_GHG')]:
-        if mrv_data.get(col) == 'Yes':
-            params.append(p_label)
-    params_str = ", ".join(params) if params else "None"
+    for col in mrv_data.index:
+        if col.startswith('Parameter_') and not col.endswith('_Precision') and col != 'Parameter_Others':
+            if mrv_data.get(col) == 'Yes':
+                label = col.replace('Parameter_Soil_', '').replace('Parameter_', '').replace('_', ' ')
+                # Translate parameter label if French
+                if is_fr:
+                    label = label.replace('organic matter SOC', 'Carbone/Matière Organique (SOC)')
+                    label = label.replace('moisture', 'Humidité')
+                    label = label.replace('temperature', 'Température')
+                    label = label.replace('Microorganisms', 'Micro-organismes')
+                    label = label.replace('Fauna', 'Faune')
+                    label = label.replace('clay mineralogy', 'Minéralogie des argiles')
+                    label = label.replace('compaction Bulk density', 'Compaction / Densité apparente')
+                    label = label.replace('Nutrient availability', 'Disponibilité des nutriments')
+                    label = label.replace('Pollutant concentration', 'Concentration de polluants')
+                    label = label.replace('depth', 'Profondeur')
+                    label = label.replace('color', 'Couleur')
+                    label = label.replace('type', 'Type de sol')
+                    label = label.replace('Water holding capacity', 'Capacité de rétention en eau')
+                    label = label.replace('Infiltration rate', 'Taux d\'infiltration')
+                    label = label.replace('Electrical conductivity', 'Conductivité électrique')
+                params.append(label)
+    params_str = ", ".join(params) if params else ("Aucun" if is_fr else "None")
     
-    # Données (English)
     data_types = []
-    for d_label, col in [('Management', 'Data_Land_Management'), ('Spatial/Sat', 'Data_Spatial_images'), ('Samples', 'Data_Soil_samples'), ('Models', 'Data_Modelling')]:
+    for col in mrv_data.index:
+        if col.startswith('Data_') and col != 'Data_Sharing':
+            if mrv_data.get(col) == 'Yes':
+                label = col.replace('Data_', '').replace('_', ' ')
+                if is_fr:
+                    label = label.replace('Land Management', 'Données de gestion')
+                    label = label.replace('Spatial images', 'Imagerie satellite')
+                    label = label.replace('Soil samples', 'Prélèvements de sol')
+                    label = label.replace('Modelling', 'Modélisation')
+                    label = label.replace('on site images', 'Scanner de sol / Photos')
+                data_types.append(label)
+    data_str = ", ".join(data_types) if data_types else ("Aucune" if is_fr else "None")
+    
+    # 2. Reporting Component (Format & Threshold)
+    formats = []
+    for col in ['Format_Document', 'Format_Online']:
         if mrv_data.get(col) == 'Yes':
-            data_types.append(d_label)
-    data_str = ", ".join(data_types) if data_types else "None"
+            label = col.replace('Format_', '')
+            if is_fr:
+                label = label.replace('Document', 'Rapport PDF/Doc').replace('Online', 'Plateforme en ligne')
+            formats.append(label)
+    formats_str = ", ".join(formats) if formats else ("Aucun" if is_fr else "None")
     
-    # Stats (English)
-    uncertainty = mrv_data.get('Uncertainty', 'N/A')
-    if str(uncertainty).lower() in ['nan', 'unknown', '']:
-        uncertainty = 'Standard'
-        
-    auditor = mrv_data.get('Auditor', 'N/A')
-    if str(auditor).lower() in ['nan', 'unknown', '']:
-        auditor = 'Internal'
-    elif auditor == 'Interne':
-        auditor = 'Internal'
-    elif auditor == 'Externe':
-        auditor = 'External'
-        
-    impl = mrv_data.get('Implementation', 'Project')
-    sharing = mrv_data.get('Data_Sharing', 'No')
     threshold = mrv_data.get('Threshold', 'N/A')
-    if str(threshold).lower() in ['nan', 'unknown', '']:
-        threshold = 'Standard'
+    threshold_translated = translate_val(threshold, is_fr)
+    if is_fr:
+        threshold_translated = threshold_translated.replace('Fixed', 'Fixe').replace('Relative_Change', 'Changement Relatif')
+        
+    # 3. Verification Component (Scheme & Auditor)
+    schemes = []
+    for col in ['Action_based', 'Result_based']:
+        if mrv_data.get(col) == 'Yes':
+            label = col.replace('_based', '-based')
+            if is_fr:
+                label = label.replace('Action-based', 'Basé sur les actions').replace('Result-based', 'Basé sur les résultats')
+            schemes.append(label)
+    schemes_str = ", ".join(schemes) if schemes else ("Aucun" if is_fr else "None")
     
-    retreat_stars = '⭐' if impl == 'Implemented' else '⭐⭐⭐'
+    auditor = mrv_data.get('Auditor', 'N/A')
+    auditor_translated = translate_val(auditor, is_fr)
+    
+    impl = mrv_data.get('Implementation', 'Project')
+    impl_translated = translate_val(impl, is_fr)
+    
+    sharing = mrv_data.get('Data_Sharing', 'No')
+    sharing_translated = translate_val(sharing, is_fr)
     
     mrv_id = mrv_data.get('ID_MRV', 'N/A')
     mrv_name = mrv_data.get('MRV_Name', 'Framework')
@@ -178,56 +254,200 @@ def generate_pokemon_card_html(mrv_data):
     year = mrv_data.get('Pub_Year', '2025')
     country = mrv_data.get('Country', 'Global')
     purpose = mrv_data.get('Purpose', 'Not specified')
+    purpose_translated = translate_val(purpose, is_fr)
+    if is_fr:
+        purpose_translated = purpose_translated.replace('Voluntary_carbon_market', 'Marché du carbone volontaire').replace('Compliance_carbon_market', 'Marché du carbone réglementaire')
     
     display_name = mrv_name[:24] + '...' if len(mrv_name) > 26 else mrv_name
+    
+    # Labels bilingual
+    lbl_land_uses = "Usage des sols :" if is_fr else "Land Uses:"
+    lbl_scales = "Échelles :" if is_fr else "Scales:"
+    lbl_purpose = "Objectif :" if is_fr else "Purpose:"
+    lbl_status = "Statut :" if is_fr else "Status:"
+    
+    lbl_monitoring = "Composant Monitoring" if is_fr else "Monitoring Component"
+    lbl_reporting = "Composant Reporting" if is_fr else "Reporting Component"
+    lbl_verification = "Composant Vérification" if is_fr else "Verification Component"
+    
+    lbl_footer_status = "Statut" if is_fr else "Status"
+    lbl_footer_source = "Source" if is_fr else "Source"
+    lbl_footer_country = "Pays" if is_fr else "Country"
+    lbl_sharing = "Partage données : " if is_fr else "Data Sharing: "
     
     html = (
         f'<div class="pokemon-card-wrapper">'
         f'<div class="pokemon-card card-{card_type}">'
         f'<div class="pokemon-card-header">'
         f'<span class="pokemon-card-name">{display_name}</span>'
-        f'<span class="pokemon-card-hp">{hp} HP {type_emoji}</span>'
+        f'<span class="pokemon-card-hp">{mrv_id} {type_emoji}</span>'
         f'</div>'
         f'<div class="pokemon-card-img-container">'
         f'<div class="pokemon-card-specs-box">'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Status:</span><span class="pokemon-spec-val">{impl}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Auditor:</span><span class="pokemon-spec-val">{auditor}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Data Sharing:</span><span class="pokemon-spec-val">{sharing}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Threshold:</span><span class="pokemon-spec-val">{threshold}</span></div>'
+        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">{lbl_land_uses}</span><span class="pokemon-spec-val">{land_uses_str}</span></div>'
+        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">{lbl_scales}</span><span class="pokemon-spec-val">{scales_str}</span></div>'
+        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">{lbl_purpose}</span><span class="pokemon-spec-val">{purpose_translated}</span></div>'
+        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">{lbl_status}</span><span class="pokemon-spec-val">{impl_translated}</span></div>'
         f'</div>'
         f'<div class="pokemon-card-img-caption">No. {mrv_id} | {country} | Author: {author} ({year})</div>'
         f'</div>'
         f'<div class="pokemon-card-body">'
         f'<div class="pokemon-card-ability">'
         f'<span class="pokemon-ability-cost">{type_emoji}</span>'
-        f'<span class="pokemon-ability-name">Land Uses & Scales</span>'
-        f'<div class="pokemon-ability-desc">Uses: <b>{land_uses_str}</b><br>Scale: <b>{scales_str}</b></div>'
+        f'<span class="pokemon-ability-name">{lbl_monitoring}</span>'
+        f'<div class="pokemon-ability-desc">Params: <b>{params_str}</b><br>Data: <b>{data_str}</b></div>'
         f'</div>'
         f'<div class="pokemon-card-ability">'
         f'<span class="pokemon-ability-cost">{energy_cost_2}</span>'
-        f'<span class="pokemon-ability-name">Parameters & Data</span>'
-        f'<div class="pokemon-ability-desc">Params: <b>{params_str}</b><br>Data: <b>{data_str}</b></div>'
+        f'<span class="pokemon-ability-name">{lbl_reporting}</span>'
+        f'<div class="pokemon-ability-desc">Format: <b>{formats_str}</b><br>Threshold: <b>{threshold_translated}</b></div>'
+        f'</div>'
+        f'<div class="pokemon-card-ability">'
+        f'<span class="pokemon-ability-cost">{energy_cost_3}</span>'
+        f'<span class="pokemon-ability-name">{lbl_verification}</span>'
+        f'<div class="pokemon-ability-desc">Scheme: <b>{schemes_str}</b><br>Auditor: <b>{auditor_translated}</b></div>'
         f'</div>'
         f'</div>'
         f'<div class="pokemon-card-footer">'
         f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Weakness</span>'
-        f'<span class="pokemon-footer-value">{uncertainty}</span>'
+        f'<span class="pokemon-footer-label">{lbl_footer_status}</span>'
+        f'<span class="pokemon-footer-value">{impl_translated}</span>'
         f'</div>'
         f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Resistance</span>'
-        f'<span class="pokemon-footer-value">{auditor}</span>'
+        f'<span class="pokemon-footer-label">{lbl_footer_source}</span>'
+        f'<span class="pokemon-footer-value">{translate_val(src, is_fr)}</span>'
         f'</div>'
         f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Retreat</span>'
-        f'<span class="pokemon-footer-value">{retreat_stars}</span>'
+        f'<span class="pokemon-footer-label">{lbl_footer_country}</span>'
+        f'<span class="pokemon-footer-value">{country}</span>'
         f'</div>'
         f'</div>'
-        f'<div class="pokemon-card-flavor">{purpose}</div>'
+        f'<div class="pokemon-card-flavor">{lbl_sharing}{sharing_translated}</div>'
         f'</div>'
         f'</div>'
     )
     return html
+
+def render_mrv_details(mrv_data, is_fr=True):
+    # Helper translations
+    def t(fr, en):
+        return fr if is_fr else en
+        
+    # Tabs for structuring information
+    tab1, tab2, tab3, tab4 = st.tabs([
+        t("📝 Général & Source", "📝 General & Source"),
+        t("🌍 Contexte & Acteurs", "🌍 Context & Stakeholders"),
+        t("🔬 Monitoring", "🔬 Monitoring"),
+        t("📊 Reporting & Vérification", "📊 Reporting & Verification")
+    ])
+    
+    with tab1:
+        col_left, col_right = st.columns(2)
+        with col_left:
+            st.write(f"**{t('Publication / Source :', 'Publication / Source:')}** {mrv_data['Pub_Title']}")
+            st.write(f"**{t('Auteur / Plateforme :', 'Author / Platform:')}** {mrv_data['Pub_Author']}")
+            st.write(f"**{t('Année :', 'Year:')}** {mrv_data['Pub_Year']}")
+        with col_right:
+            st.write(f"**{t('Pays :', 'Country:')}** {translate_val(mrv_data.get('Country', 'N/A'), is_fr)}")
+            st.write(f"**{t('Continent :', 'Continent:')}** {translate_val(mrv_data.get('Continent', 'N/A'), is_fr)}")
+            if mrv_data['Pub_Link']:
+                st.markdown(f"[{t('🔗 Accéder à la source originale', '🔗 Access Original Source')}]({mrv_data['Pub_Link']})")
+            else:
+                st.write(t("*Lien source indisponible*", "*Source link unavailable*"))
+                
+    with tab2:
+        col_left, col_right = st.columns(2)
+        with col_left:
+            st.markdown(f"<div class='section-header'>{t('Usages des Sols', 'Land Uses')}</div>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Agriculture :', 'Agriculture:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Agriculture', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Forêt :', 'Forest:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Forest') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Forest') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Forest', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Urbain :', 'Urban:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Urban') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Urban') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Urban', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Terre Dégradée :', 'Degraded Land:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Degraded_land', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Tourbière / Zone Humide :', 'Peatland / Wetland:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Land_use_Peatland_Wetland', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            if mrv_data.get('Land_use_Others_ Precision') and str(mrv_data['Land_use_Others_ Precision']).lower() != 'nan':
+                st.write(f"- {t('Autres détails :', 'Other details:')} *{mrv_data['Land_use_Others_ Precision']}*")
+                
+            st.markdown(f"<div class='section-header'>{t('Échelle d\'Application', 'Application Scale')}</div>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Locale :', 'Local:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Local') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Local') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Local', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Régionale :', 'Regional:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Regional') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Regional') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Regional', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Nationale :', 'National:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_National') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_National') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_National', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Continentale :', 'Continental:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Continental') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Continental') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Continental', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Globale :', 'Global:')} <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Global') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Global') == 'Yes' else '#C62828'}'>{translate_val(mrv_data.get('Scale_Global', 'No'), is_fr)}</span>", unsafe_allow_html=True)
+
+        with col_right:
+            st.markdown(f"<div class='section-header'>{t('Objectifs & Leviers', 'Objectives & Drivers')}</div>", unsafe_allow_html=True)
+            st.write(f"**{t('Objectif de marché :', 'Market purpose:')}** {translate_val(mrv_data['Purpose'], is_fr).replace('Voluntary_carbon_market', 'Marché du carbone volontaire').replace('Compliance_carbon_market', 'Marché du carbone réglementaire')}")
+            st.write(f"**{t('Statut d\'implémentation :', 'Implementation status:')}** {translate_val(mrv_data['Implementation'], is_fr)}")
+            
+            # Find active drivers
+            active_drivers = []
+            for c in mrv_data.index:
+                if c.startswith('Driver_') and mrv_data[c] == 'Yes':
+                    drv_name = c.replace('Driver_', '').replace('_', ' ')
+                    if is_fr:
+                        drv_name = drv_name.replace('Agricultural practices', 'Pratiques agricoles')
+                        drv_name = drv_name.replace('Afforestation Reforestation', 'Reboisement / Boisement')
+                        drv_name = drv_name.replace('Forest management', 'Gestion forestière')
+                        drv_name = drv_name.replace('Land conversion', 'Conversion des terres')
+                        drv_name = drv_name.replace('Fire management', 'Gestion du feu')
+                    active_drivers.append(drv_name)
+            if active_drivers:
+                st.write(f"**{t('Pratiques / Leviers ciblés :', 'Targeted Agricultural Practices / Drivers:')}**")
+                for d in active_drivers:
+                    st.markdown(f"- {d.capitalize()}")
+            else:
+                st.write(t("*Aucun levier spécifique listé*", "*No specific driver listed*"))
+                
+    with tab3:
+        col_left, col_right = st.columns(2)
+        with col_left:
+            st.markdown(f"<div class='section-header'>{t('Paramètres du Sol Mesurés', 'Measured Soil Parameters')}</div>", unsafe_allow_html=True)
+            active_params = []
+            for c in mrv_data.index:
+                if c.startswith('Parameter_') and mrv_data[c] == 'Yes':
+                    p_name = c.replace('Parameter_', '').replace('_', ' ')
+                    if is_fr:
+                        p_name = p_name.replace('Soil organic matter SOC', 'Carbone / Matière organique (SOC)')
+                        p_name = p_name.replace('Soil pH', 'pH du sol')
+                        p_name = p_name.replace('Soil moisture', 'Humidité du sol')
+                        p_name = p_name.replace('Soil temperature', 'Température du sol')
+                        p_name = p_name.replace('Soil Microorganisms', 'Micro-organismes')
+                        p_name = p_name.replace('Soil Fauna', 'Faune du sol')
+                        p_name = p_name.replace('GHG', 'Flux de GES (CO2, N2O...)')
+                    active_params.append(p_name)
+            if active_params:
+                for p in active_params:
+                    st.markdown(f"- {p.capitalize()}")
+            else:
+                st.write(t("*Aucun paramètre standard spécifié*", "*No standard parameter specified*"))
+                
+        with col_right:
+            st.markdown(f"<div class='section-header'>{t('Types de Données Utilisés', 'Used Data Types')}</div>", unsafe_allow_html=True)
+            st.markdown(f"- {t('Données de gestion :', 'Management surveys:')} {translate_val(mrv_data.get('Data_Land_Management', 'No'), is_fr)}")
+            st.markdown(f"- {t('Imagerie satellite / spatiale :', 'Satellite / spatial imagery:')} {translate_val(mrv_data.get('Data_Spatial_images', 'No'), is_fr)}")
+            st.markdown(f"- {t('Prélèvements de sol :', 'Physical soil samples:')} {translate_val(mrv_data.get('Data_Soil_samples', 'No'), is_fr)}")
+            st.markdown(f"- {t('Modélisation :', 'Modelling:')} {translate_val(mrv_data.get('Data_Modelling', 'No'), is_fr)}")
+            st.markdown(f"- {t('Scanner de sol (site) :', 'On-site scanner imagery:')} {translate_val(mrv_data.get('Data_on_site_images', 'No'), is_fr)}")
+            
+            st.markdown(f"<div class='section-header'>{t('Plan d\'Échantillonnage', 'Sampling Plan')}</div>", unsafe_allow_html=True)
+            st.write(f"**{t('Fréquence de suivi :', 'Monitoring frequency:')}** {translate_val(mrv_data['Monitoring_frequency'], is_fr)}")
+            st.write(f"**{t('Superficie moyenne de parcelle :', 'Average plot area:')}** {mrv_data.get('Plot_Area', 'N/A')} {mrv_data.get('Plot_Area_Unit', '')}")
+            st.write(f"**{t('Méthodologie standardisée :', 'Standardized methodology:')}** {translate_val(mrv_data.get('Methodology_Standard', 'No'), is_fr)}")
+
+    with tab4:
+        col_left, col_right = st.columns(2)
+        with col_left:
+            st.markdown(f"<div class='section-header'>{t('Reporting & Incertitude', 'Reporting & Uncertainty')}</div>", unsafe_allow_html=True)
+            st.write(f"**{t('Format du rapport :', 'Report format:')}** Document: {translate_val(mrv_data.get('Format_Document', 'No'), is_fr)} | Online: {translate_val(mrv_data.get('Format_Online', 'No'), is_fr)}")
+            st.write(f"**{t('Méthode de calcul d\'incertitude :', 'Uncertainty calculation method:')}** {translate_val(mrv_data['Uncertainty'], is_fr)}")
+            st.write(f"**{t('Méthode de calcul du seuil :', 'Threshold calculation method:')}** {translate_val(mrv_data['Threshold'], is_fr).replace('Fixed', 'Fixe').replace('Relative_Change', 'Changement Relatif')}")
+            
+        with col_right:
+            st.markdown(f"<div class='section-header'>{t('Vérification & Gouvernance', 'Verification & Governance')}</div>", unsafe_allow_html=True)
+            st.write(f"**{t('Schéma basé sur les actions :', 'Action-based scheme:')}** {translate_val(mrv_data.get('Action_based', 'No'), is_fr)}")
+            st.write(f"**{t('Schéma basé sur les résultats :', 'Result-based scheme:')}** {translate_val(mrv_data.get('Result_based', 'No'), is_fr)}")
+            st.write(f"**{t('Auditeur :', 'Auditor:')}** {translate_val(mrv_data['Auditor'], is_fr)}")
+            st.write(f"**{t('Partage des données :', 'Data sharing:')}** {translate_val(mrv_data.get('Data_Sharing', 'No'), is_fr)}")
 
 # Page configuration
 st.set_page_config(
@@ -574,6 +794,8 @@ st.markdown("""
         display: flex;
         justify-content: center;
         margin-bottom: 24px;
+        -webkit-perspective: 1000px;
+        -moz-perspective: 1000px;
         perspective: 1000px;
     }
     
@@ -584,6 +806,9 @@ st.markdown("""
         border-radius: 18px;
         padding: 12px 14px 14px 14px;
         box-sizing: border-box;
+        -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+        -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+        -o-transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
         transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
         position: relative;
         overflow: hidden;
@@ -591,6 +816,10 @@ st.markdown("""
     }
     
     .pokemon-card:hover {
+        -webkit-transform: translateY(-8px) rotateY(2deg);
+        -moz-transform: translateY(-8px) rotateY(2deg);
+        -ms-transform: translateY(-8px) rotateY(2deg);
+        -o-transform: translateY(-8px) rotateY(2deg);
         transform: translateY(-8px) rotateY(2deg);
     }
     
@@ -806,24 +1035,36 @@ if LOGO_PATH:
     st.sidebar.image(LOGO_PATH, use_column_width=True)
 st.sidebar.markdown(f"<div style='text-align: center; color: #2C5E43; font-weight: bold; margin-bottom: 15px;'>Soil & MRV Database</div>", unsafe_allow_html=True)
 
-app_mode = st.sidebar.selectbox('Navigation Menu', [
-    '🏠 Home',
-    '🔎 Decision Tool',
-    '🗂️ Pokedex',
-    '📚 Articles',
-    '📊 MRV Guide'
+# Language selector
+st.sidebar.markdown("<div class='section-header' style='font-size: 10px; margin-top: 10px; margin-bottom: 5px; color: #dab254; font-weight: 600; text-transform: uppercase;'>🌐 Langue / Language</div>", unsafe_allow_html=True)
+lang = st.sidebar.selectbox("Language select", ["Français", "English"], label_visibility="collapsed")
+is_fr = (lang == "Français")
+
+def t(fr, en):
+    return fr if is_fr else en
+
+app_mode = st.sidebar.selectbox(t('Menu de Navigation', 'Navigation Menu'), [
+    t('🏠 Accueil', '🏠 Home'),
+    t('🔎 Outil de Décision', '🔎 Decision Tool'),
+    t('🗂️ Pokedex', '🗂️ Pokedex'),
+    t('📚 Bibliographie', '📚 Articles'),
+    t('📊 Guide MRV', '📊 MRV Guide')
 ])
 
 # Clean the emoji and text for routing
 mode_clean = app_mode.replace('🏠 ', '').replace('🔎 ', '').replace('🗂️ ', '').replace('📚 ', '').replace('📊 ', '')
+if is_fr:
+    mode_clean = mode_clean.replace('Accueil', 'Home').replace('Outil de Décision', 'Decision Tool').replace('Bibliographie', 'Articles').replace('Guide MRV', 'MRV Guide')
 
 # ----------------- HOME PAGE -----------------
 if mode_clean == 'Home':
-    st.markdown(f"<h1>Soil Health & MRV Exploration Tool</h1>", unsafe_allow_html=True)
-    st.markdown("""
-    This interactive application allows you to explore and filter **Monitoring, Reporting, and Verification (MRV)** methodologies applied to soil carbon and quality assessment.
-    The data combines publications from a systematic literature review (**Scopus**), **web scraping** of certification platforms and methodologies, and **AI-assisted** research.
-    """)
+    st.markdown(f"<h1>{t('Explorateur de Systèmes de Suivi, Notification et Vérification (MRV)', 'Soil Health & MRV Exploration Tool')}</h1>", unsafe_allow_html=True)
+    st.markdown(t(
+        """Cette application interactive vous permet de parcourir et filtrer les méthodologies de **Monitoring, Reporting et Verification (MRV)** appliquées à l'évaluation du carbone et de la qualité des sols.
+        Les données proviennent de trois sources : une revue de littérature systématique (**Scopus**), du **web scraping** de plateformes de certification et de méthodologies, et des recherches assistées par **IA**.""",
+        """This interactive application allows you to explore and filter **Monitoring, Reporting, and Verification (MRV)** methodologies applied to soil carbon and quality assessment.
+        The data combines publications from a systematic literature review (**Scopus**), **web scraping** of certification platforms and methodologies, and **AI-assisted** research."""
+    ))
     if BANNER_PATH:
         banner_cropped = get_cropped_image(BANNER_PATH, 1200, 250)
         if banner_cropped:
@@ -831,53 +1072,53 @@ if mode_clean == 'Home':
     st.divider()
     
     # 1. KPIs
-    st.markdown(f"<h3>Database Statistics</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3>{t('Statistiques de la Base de Données', 'Database Statistics')}</h3>", unsafe_allow_html=True)
     
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
             <div class="kpi-num">96</div>
-            <div class="kpi-label">MRV Frameworks</div>
+            <div class="kpi-label">{t('Cadres MRV', 'MRV Frameworks')}</div>
         </div>
         """, unsafe_allow_html=True)
     with c2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
             <div class="kpi-num">26</div>
-            <div class="kpi-label">Literature Reviews</div>
+            <div class="kpi-label">{t('Revues Littérature', 'Literature Reviews')}</div>
         </div>
         """, unsafe_allow_html=True)
     with c3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
             <div class="kpi-num">69</div>
-            <div class="kpi-label">Web Scraping</div>
+            <div class="kpi-label">{t('Web Scraping', 'Web Scraping')}</div>
         </div>
         """, unsafe_allow_html=True)
     with c4:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
             <div class="kpi-num">1</div>
-            <div class="kpi-label">AI Search</div>
+            <div class="kpi-label">{t('Recherche IA', 'AI Search')}</div>
         </div>
         """, unsafe_allow_html=True)
         
     st.divider()
     
     # 2. Charts
-    st.markdown(f"<h3>Framework Distribution</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3>{t('Distribution des Cadres MRV', 'Framework Distribution')}</h3>", unsafe_allow_html=True)
     col_chart1, col_chart2 = st.columns(2)
     
     with col_chart1:
-        st.markdown("<p style='font-weight: 600; color: #52B788;'>Distribution by Land Use</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-weight: 600; color: #52B788;'>{t('Distribution par Usage des Sols', 'Distribution by Land Use')}</p>", unsafe_allow_html=True)
         # Calculate the number of Yes for each Land Use type
         lu_columns = {
-            'Agriculture': 'Land_use_Agriculture',
-            'Forest': 'Land_use_Forest',
-            'Urban': 'Land_use_Urban',
-            'Degraded Land': 'Land_use_Degraded_land',
-            'Peatland/Wetland': 'Land_use_Peatland_Wetland'
+            t('Agriculture', 'Agriculture'): 'Land_use_Agriculture',
+            t('Forêt', 'Forest'): 'Land_use_Forest',
+            t('Urbain', 'Urban'): 'Land_use_Urban',
+            t('Terres dégradées', 'Degraded Land'): 'Land_use_Degraded_land',
+            t('Zones Humides / Tourbières', 'Peatland/Wetland'): 'Land_use_Peatland_Wetland'
         }
         lu_counts = {}
         for label, col in lu_columns.items():
@@ -890,7 +1131,7 @@ if mode_clean == 'Home':
         ax.set_yticks(y_pos)
         ax.set_yticklabels(list(lu_counts.keys()), fontsize=10, fontweight='medium')
         ax.invert_yaxis()  # top-down
-        ax.set_xlabel("Number of Frameworks", fontsize=9)
+        ax.set_xlabel(t("Nombre de Cadres", "Number of Frameworks"), fontsize=9)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['left'].set_color('#24352C')
@@ -899,13 +1140,13 @@ if mode_clean == 'Home':
         st.pyplot(fig)
         
     with col_chart2:
-        st.markdown("<p style='font-weight: 600; color: #52B788;'>Distribution by Spatial Scale</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-weight: 600; color: #52B788;'>{t('Distribution par Échelle Spatiale', 'Distribution by Spatial Scale')}</p>", unsafe_allow_html=True)
         scale_columns = {
-            'Local': 'Scale_Local',
-            'Regional': 'Scale_Regional',
-            'National': 'Scale_National',
-            'Continental': 'Scale_Continental',
-            'Global': 'Scale_Global'
+            t('Locale', 'Local'): 'Scale_Local',
+            t('Régionale', 'Regional'): 'Scale_Regional',
+            t('Nationale', 'National'): 'Scale_National',
+            t('Continentale', 'Continental'): 'Scale_Continental',
+            t('Globale', 'Global'): 'Scale_Global'
         }
         scale_counts = {}
         for label, col in scale_columns.items():
@@ -918,7 +1159,7 @@ if mode_clean == 'Home':
         ax.set_yticks(y_pos)
         ax.set_yticklabels(list(scale_counts.keys()), fontsize=10, fontweight='medium')
         ax.invert_yaxis()
-        ax.set_xlabel("Number of Frameworks", fontsize=9)
+        ax.set_xlabel(t("Nombre de Cadres", "Number of Frameworks"), fontsize=9)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['left'].set_color('#24352C')
@@ -929,15 +1170,15 @@ if mode_clean == 'Home':
     st.divider()
     
     # 3. Decision Tool variables structure (variables.json)
-    st.markdown(f"<h3>Decision Variables Structure</h3>", unsafe_allow_html=True)
-    st.write("This table details the descriptors used in the database. You can search by keyword.")
+    st.markdown(f"<h3>{t('Structure des Variables de Décision', 'Decision Variables Structure')}</h3>", unsafe_allow_html=True)
+    st.write(t("Ce tableau détaille les descripteurs utilisés dans la base de données. Vous pouvez effectuer une recherche par mot-clé.", "This table details the descriptors used in the database. You can search by keyword."))
     
     if variables:
         df_vars = pd.DataFrame(variables)
-        df_vars.columns = ['Variable', 'Category', 'Sub-Category', 'Modalities', 'Explanation']
+        df_vars.columns = [t('Variable', 'Variable'), t('Catégorie', 'Category'), t('Sous-Catégorie', 'Sub-Category'), t('Modalités', 'Modalities'), t('Explication', 'Explanation')]
         
         # Search query
-        search_query = st.text_input("🔍 Search for a variable...", placeholder="E.g., SOC, Agriculture, Uncertainty...")
+        search_query = st.text_input(t("🔍 Rechercher une variable...", "🔍 Search for a variable..."), placeholder=t("Ex: SOC, Agriculture, Incertitude...", "E.g., SOC, Agriculture, Uncertainty..."))
         if search_query:
             df_filtered_vars = df_vars[
                 df_vars['Variable'].str.contains(search_query, case=False, na=False) |
@@ -981,88 +1222,227 @@ if mode_clean == 'Home':
 
 # ----------------- DECISION TOOL PAGE -----------------
 elif mode_clean == 'Decision Tool':
-    st.markdown(f"<h1>MRV Decision Support Tool</h1>", unsafe_allow_html=True)
-    st.markdown("Use the sidebar filters to find MRV frameworks that match your needs.")
+    st.markdown(f"<h1>{t('Outil d\'Aide à la Décision MRV', 'MRV Decision Support Tool')}</h1>", unsafe_allow_html=True)
+    st.markdown(t("Utilisez les filtres de la barre latérale pour trouver les cadres MRV qui correspondent à vos besoins.", "Use the sidebar filters to find MRV frameworks that match your needs."))
     
     # Sidebar Filters construction
-    st.sidebar.markdown("<div class='section-header'>Filter Configuration</div>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<div class='section-header'>{t('Configuration des Filtres', 'Filter Configuration')}</div>", unsafe_allow_html=True)
     
     # Search mode
     filter_mode = st.sidebar.radio(
-        "Search Mode",
-        ["⭐ Matching Score (Recommended)", "🔒 Strict Filtering (AND)"],
-        help="The matching score ranks results from best to worst, avoiding 0 results if you select multiple criteria."
+        t("Mode de Recherche", "Search Mode"),
+        [t("⭐ Score de Correspondance (Recommandé)", "⭐ Matching Score (Recommended)"), t("🔒 Filtrage Strict (ET)", "🔒 Strict Filtering (AND)")],
+        help=t("Le score de correspondance classe les résultats du meilleur au moins bon, évitant les résultats vides.", "The matching score ranks results from best to worst, avoiding 0 results if you select multiple criteria.")
     )
     
     # 1. Context & Land Uses
-    st.sidebar.subheader("🌱 Context & Land Uses")
+    st.sidebar.subheader(t("🌱 Contexte & Usages des Sols", "🌱 Context & Land Uses"))
     
     selected_land_uses = []
-    if st.sidebar.checkbox("Agriculture", value=False): selected_land_uses.append('Land_use_Agriculture')
-    if st.sidebar.checkbox("Forest", value=False): selected_land_uses.append('Land_use_Forest')
-    if st.sidebar.checkbox("Urban", value=False): selected_land_uses.append('Land_use_Urban')
-    if st.sidebar.checkbox("Degraded Land", value=False): selected_land_uses.append('Land_use_Degraded_land')
-    if st.sidebar.checkbox("Peatland / Wetland", value=False): selected_land_uses.append('Land_use_Peatland_Wetland')
+    if st.sidebar.checkbox(t("Agriculture", "Agriculture"), value=False): selected_land_uses.append('Land_use_Agriculture')
+    if st.sidebar.checkbox(t("Forêt", "Forest"), value=False): selected_land_uses.append('Land_use_Forest')
+    if st.sidebar.checkbox(t("Urbain", "Urban"), value=False): selected_land_uses.append('Land_use_Urban')
+    if st.sidebar.checkbox(t("Terre Dégradée", "Degraded Land"), value=False): selected_land_uses.append('Land_use_Degraded_land')
+    if st.sidebar.checkbox(t("Tourbière / Zone Humide", "Peatland / Wetland"), value=False): selected_land_uses.append('Land_use_Peatland_Wetland')
     
     selected_scales = []
-    if st.sidebar.checkbox("Local Scale", value=False): selected_scales.append('Scale_Local')
-    if st.sidebar.checkbox("Regional Scale", value=False): selected_scales.append('Scale_Regional')
-    if st.sidebar.checkbox("National Scale", value=False): selected_scales.append('Scale_National')
-    if st.sidebar.checkbox("Global Scale", value=False): selected_scales.append('Scale_Global')
+    if st.sidebar.checkbox(t("Échelle Locale", "Local Scale"), value=False): selected_scales.append('Scale_Local')
+    if st.sidebar.checkbox(t("Échelle Régionale", "Regional Scale"), value=False): selected_scales.append('Scale_Regional')
+    if st.sidebar.checkbox(t("Échelle Nationale", "National Scale"), value=False): selected_scales.append('Scale_National')
+    if st.sidebar.checkbox(t("Échelle Continentale", "Continental Scale"), value=False): selected_scales.append('Scale_Continental')
+    if st.sidebar.checkbox(t("Échelle Globale", "Global Scale"), value=False): selected_scales.append('Scale_Global')
     
     purpose_options = ['All'] + list(combined_df['Purpose'].unique())
-    selected_purpose = st.sidebar.selectbox("Purpose", purpose_options)
+    translated_purposes = [t("Tous", "All") if p == 'All' else translate_val(p, is_fr) for p in purpose_options]
+    selected_purpose_idx = st.sidebar.selectbox(t("Objectif", "Purpose"), range(len(purpose_options)), format_func=lambda x: translated_purposes[x])
+    selected_purpose = purpose_options[selected_purpose_idx]
+
+    # Drivers Map
+    DRIVER_MAP = {
+        "Agricultural practices": "Driver_Agricultural_practices",
+        "Afforestation / Reforestation": "Driver_Afforestation_Reforestation",
+        "Biochar": "Driver_Biochar",
+        "Forest management": "Driver_Forest_management",
+        "Conservation": "Driver_Conservation",
+        "Deforestation": "Driver_Deforestation",
+        "Restoration": "Driver_Restoration",
+        "Weathering": "Driver_Weathering",
+        "Grazing": "Driver_Grazing",
+        "Irrigation": "Driver_Irrigation",
+        "Land conversion": "Driver_Land_conversion",
+        "Rewetting": "Driver_Rewetting",
+        "Fire management": "Driver_Fire_management"
+    }
+    DRIVER_MAP_KEYS_FR = {
+        "Agricultural practices": "Pratiques agricoles",
+        "Afforestation / Reforestation": "Reboisement / Boisement",
+        "Biochar": "Biochar",
+        "Forest management": "Gestion forestière",
+        "Conservation": "Conservation",
+        "Deforestation": "Déforestation",
+        "Restoration": "Restauration",
+        "Weathering": "Altération forcée",
+        "Grazing": "Pâturage",
+        "Irrigation": "Irrigation",
+        "Land conversion": "Conversion des terres",
+        "Rewetting": "Remise en eau",
+        "Fire management": "Gestion du feu"
+    }
+    drivers_list = list(DRIVER_MAP.keys())
+    translated_drivers = [DRIVER_MAP_KEYS_FR[d] if is_fr else d for d in drivers_list]
+    selected_driver_indices = st.sidebar.multiselect(
+        t("Leviers / Pratiques agricoles", "Drivers / Management Changes"),
+        range(len(drivers_list)),
+        format_func=lambda x: translated_drivers[x]
+    )
+    selected_drivers = [drivers_list[idx] for idx in selected_driver_indices]
+    
+    # Occupations Map
+    OCCUPATION_MAP = {
+        "Farmers": "Occupation_Farmers",
+        "Foresters & Forester Associations": "Occupation_Foresters_Forester_Associations",
+        "Public Administrators": "Occupation_Public_Administrators",
+        "Educational & Research Institutions": "Occupation_Educational_Institutions_Research",
+        "NGOs": "Occupation_NGOs",
+        "Agroindustry": "Occupation_Agroindustry",
+        "Forestry Companies": "Occupation_Forestry_Companies",
+        "Consultancy": "Occupation_Consultancy",
+        "Project Developer": "Occupation_Project_developer",
+        "Other Companies": "Occupation_Other_companies",
+        "Software Developers": "Occupation_Software_developers"
+    }
+    OCCUPATION_KEYS_FR = {
+        "Farmers": "Agriculteurs",
+        "Foresters & Forester Associations": "Forestiers & Associations de forestiers",
+        "Public Administrators": "Administrations publiques",
+        "Educational & Research Institutions": "Établissements d'enseignement & Recherche",
+        "NGOs": "ONG",
+        "Agroindustry": "Agro-industrie",
+        "Forestry Companies": "Sociétés forestières",
+        "Consultancy": "Bureaux de conseil",
+        "Project Developer": "Développeurs de projets",
+        "Other Companies": "Autres entreprises",
+        "Software Developers": "Développeurs de logiciels"
+    }
+    occupations_list = list(OCCUPATION_MAP.keys())
+    translated_occupations = [OCCUPATION_KEYS_FR[o] if is_fr else o for o in occupations_list]
+    selected_occupation_indices = st.sidebar.multiselect(
+        t("Acteurs / Occupations", "Stakeholder Occupations"),
+        range(len(occupations_list)),
+        format_func=lambda x: translated_occupations[x]
+    )
+    selected_occupations = [occupations_list[idx] for idx in selected_occupation_indices]
     
     # 2. Soil Parameters & Data
-    st.sidebar.subheader("🔬 Soil Parameters & Data")
+    st.sidebar.subheader(t("🔬 Paramètres & Données du Sol", "🔬 Soil Parameters & Data"))
     
-    selected_params = []
-    if st.sidebar.checkbox("Soil Organic Carbon (SOC)", value=False): selected_params.append('Parameter_Soil_organic_matter_SOC')
-    if st.sidebar.checkbox("Soil pH", value=False): selected_params.append('Parameter_Soil_pH')
-    if st.sidebar.checkbox("Soil Moisture", value=False): selected_params.append('Parameter_Soil_moisture')
-    if st.sidebar.checkbox("Soil Temperature", value=False): selected_params.append('Parameter_Soil_temperature')
-    if st.sidebar.checkbox("Organic Matter / Microorganisms", value=False): selected_params.append('Parameter_Soil_Microorganisms')
-    if st.sidebar.checkbox("Greenhouse Gases (GHG)", value=False): selected_params.append('Parameter_GHG')
+    PARAM_MAP = {
+        "Soil Organic Carbon (SOC)": "Parameter_Soil_organic_matter_SOC",
+        "Soil pH": "Parameter_Soil_pH",
+        "Soil Moisture": "Parameter_Soil_moisture",
+        "Soil Temperature": "Parameter_Soil_temperature",
+        "Soil Microorganisms": "Parameter_Soil_Microorganisms",
+        "Soil Fauna": "Parameter_Soil_Fauna",
+        "Greenhouse Gases (GHG)": "Parameter_GHG",
+        "Oxygen Content": "Parameter_Oxygen_content",
+        "Clay Mineralogy": "Parameter_Clay_mineralogy",
+        "CEC (Cation Exchange Capacity)": "Parameter_CEC",
+        "Particle Size Distribution / Texture": "Parameter_Particle_size_distribution_Texture",
+        "Soil Porosity": "Parameter_Soil_porosity",
+        "Soil Diffusivity": "Parameter_Soil_diffusivity",
+        "Aggregate Stability": "Parameter_Aggregate_stability",
+        "Soil Compaction / Bulk Density": "Parameter_Soil_compaction_Bulk_density",
+        "Nutrient Availability": "Parameter_Nutrient_availability",
+        "Pollutant Concentration": "Parameter_Pollutant_concentration",
+        "Soil Depth": "Parameter_Soil_depth",
+        "Peat Depth": "Parameter_Peat_depth",
+        "Soil Color": "Parameter_Soil_color",
+        "Soil Type": "Parameter_Soil_type",
+        "Subsidence": "Parameter_Subsidence",
+        "CaCO3": "Parameter_CaCO3",
+        "Electrical Conductivity": "Parameter_Electrical_conductivity",
+        "Water Holding Capacity": "Parameter_Water_holding_capacity",
+        "Infiltration Rate": "Parameter_Infiltration_rate"
+    }
+    PARAM_KEYS_FR = {
+        "Soil Organic Carbon (SOC)": "Carbone Organique du Sol (SOC)",
+        "Soil pH": "pH du sol",
+        "Soil Moisture": "Humidité du sol",
+        "Soil Temperature": "Température du sol",
+        "Soil Microorganisms": "Micro-organismes du sol",
+        "Soil Fauna": "Faune du sol",
+        "Greenhouse Gases (GHG)": "Gaz à Effet de Serre (GES)",
+        "Oxygen Content": "Teneur en oxygène",
+        "Clay Mineralogy": "Minéralogie des argiles",
+        "CEC (Cation Exchange Capacity)": "Capacité d'échange cationique (CEC)",
+        "Particle Size Distribution / Texture": "Texture du sol / Granulométrie",
+        "Soil Porosity": "Porosité du sol",
+        "Soil Diffusivity": "Diffusivité du sol",
+        "Aggregate Stability": "Stabilité des agrégats",
+        "Soil Compaction / Bulk Density": "Compaction / Densité apparente",
+        "Nutrient Availability": "Disponibilité des nutriments",
+        "Pollutant Concentration": "Concentration de polluants",
+        "Soil Depth": "Profondeur du sol",
+        "Peat Depth": "Profondeur de la tourbe",
+        "Soil Color": "Couleur du sol",
+        "Soil Type": "Type de sol",
+        "Subsidence": "Subsidence",
+        "CaCO3": "CaCO3",
+        "Electrical Conductivity": "Conductivité électrique",
+        "Water Holding Capacity": "Capacité de rétention d'eau",
+        "Infiltration Rate": "Taux d'infiltration"
+    }
+    params_list = list(PARAM_MAP.keys())
+    translated_params = [PARAM_KEYS_FR[p] if is_fr else p for p in params_list]
+    selected_param_indices = st.sidebar.multiselect(
+        t("Paramètres du Sol", "Soil Parameters"),
+        range(len(params_list)),
+        format_func=lambda x: translated_params[x]
+    )
+    selected_param_names = [params_list[idx] for idx in selected_param_indices]
+    selected_params = [PARAM_MAP[name] for name in selected_param_names]
     
     selected_data_types = []
-    if st.sidebar.checkbox("Land Management Data", value=False): selected_data_types.append('Data_Land_Management')
-    if st.sidebar.checkbox("Spatial / Satellite Imagery", value=False): selected_data_types.append('Data_Spatial_images')
-    if st.sidebar.checkbox("Physical Soil Sampling", value=False): selected_data_types.append('Data_Soil_samples')
-    if st.sidebar.checkbox("Numerical Modelling", value=False): selected_data_types.append('Data_Modelling')
+    if st.sidebar.checkbox(t("Données de gestion des terres", "Land Management Data"), value=False): selected_data_types.append('Data_Land_Management')
+    if st.sidebar.checkbox(t("Imagerie Spatiale / Satellite", "Spatial / Satellite Imagery"), value=False): selected_data_types.append('Data_Spatial_images')
+    if st.sidebar.checkbox(t("Prélèvements physiques de sol", "Physical Soil Sampling"), value=False): selected_data_types.append('Data_Soil_samples')
+    if st.sidebar.checkbox(t("Modélisation numérique", "Numerical Modelling"), value=False): selected_data_types.append('Data_Modelling')
+    if st.sidebar.checkbox(t("Scanner de sol sur site", "On-site Imagery (Soil Scanner)"), value=False): selected_data_types.append('Data_on_site_images')
     
     # 3. Reporting & Verification
-    st.sidebar.subheader("📝 Reporting & Verification")
+    st.sidebar.subheader(t("📝 Reporting & Vérification", "📝 Reporting & Verification"))
+    
+    selected_formats = []
+    if st.sidebar.checkbox(t("Rapport de document standard", "Standard Document Report"), value=False): selected_formats.append('Format_Document')
+    if st.sidebar.checkbox(t("Saisie sur plateforme en ligne", "Online Platform Entry"), value=False): selected_formats.append('Format_Online')
     
     selected_verif_schemes = []
-    if st.sidebar.checkbox("Action-based Scheme", value=False): selected_verif_schemes.append('Action_based')
-    if st.sidebar.checkbox("Result-based Scheme", value=False): selected_verif_schemes.append('Result_based')
-    
-    auditor_options = ['All', 'External', 'Internal']
-    selected_auditor = st.sidebar.selectbox("Auditor", auditor_options)
-    
-    sharing_options = ['All', 'Yes', 'No']
-    selected_sharing = st.sidebar.selectbox("Data Sharing", sharing_options)
+    if st.sidebar.checkbox(t("Schéma basé sur les actions", "Action-based Scheme"), value=False): selected_verif_schemes.append('Action_based')
+    if st.sidebar.checkbox(t("Schéma basé sur les résultats", "Result-based Scheme"), value=False): selected_verif_schemes.append('Result_based')
     
     state_options = ['All', 'Implemented', 'Project']
-    selected_state = st.sidebar.selectbox("Implementation Status", state_options)
+    translated_states = [t("Tous", "All"), t("Implémenté", "Implemented"), t("Projet", "Project")]
+    selected_state_idx = st.sidebar.selectbox(t("Statut d'implémentation", "Implementation Status"), range(len(state_options)), format_func=lambda x: translated_states[x])
+    selected_state = state_options[selected_state_idx]
 
     # Calcul des filtres actifs
     active_filters = {}
     for col in selected_land_uses: active_filters[col] = 'Yes'
     for col in selected_scales: active_filters[col] = 'Yes'
+    for name in selected_drivers: active_filters[DRIVER_MAP[name]] = 'Yes'
+    for name in selected_occupations: active_filters[OCCUPATION_MAP[name]] = 'Yes'
     for col in selected_params: active_filters[col] = 'Yes'
     for col in selected_data_types: active_filters[col] = 'Yes'
+    for col in selected_formats: active_filters[col] = 'Yes'
     for col in selected_verif_schemes: active_filters[col] = 'Yes'
     
     if selected_purpose != 'All': active_filters['Purpose'] = selected_purpose
-    if selected_auditor != 'All': active_filters['Auditor'] = selected_auditor
-    if selected_sharing != 'All': active_filters['Data_Sharing'] = selected_sharing
     if selected_state != 'All': active_filters['Implementation'] = selected_state
 
     # 4. Appliquer le Filtrage
     df_results = combined_df.copy()
     
-    if "🔒 Filtrage Strict (ET)" in filter_mode:
+    if "🔒 Strict" in filter_mode or "🔒 Filtrage" in filter_mode:
         # Filtrer strictement
         for col, val in active_filters.items():
             df_results = df_results[df_results[col] == val]
@@ -1085,33 +1465,38 @@ elif mode_clean == 'Decision Tool':
 
     # Search stats display
     num_matches = len(df_results)
-    if "🔒 Strict Filtering" in filter_mode:
-        st.markdown(f"<h3>{num_matches} frameworks match your criteria exactly</h3>", unsafe_allow_html=True)
+    if "🔒 Strict" in filter_mode or "🔒 Filtrage" in filter_mode:
+        st.markdown(f"<h3>{t(f'{num_matches} cadres correspondent exactement à vos critères', f'{num_matches} frameworks match your criteria exactly')}</h3>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<h3>Ranking of 96 frameworks by match level</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3>{t('Classement des 96 cadres par niveau de correspondance', 'Ranking of 96 frameworks by match level')}</h3>", unsafe_allow_html=True)
         
     st.divider()
     
     # Results table
     display_cols = ['ID_MRV', 'MRV_Name', 'Source', 'Match_Score', 'Purpose', 'Implementation']
     df_table = df_results[display_cols].copy()
-    df_table.columns = ['ID', 'Framework Name', 'Data Source', 'Matching Score (%)', 'Purpose', 'Implementation']
+    # Translate some columns in the table
+    df_table['Source'] = df_table['Source'].apply(lambda x: translate_val(x, is_fr))
+    df_table['Purpose'] = df_table['Purpose'].apply(lambda x: translate_val(x, is_fr).replace('Voluntary_carbon_market', 'Volontaire').replace('Compliance_carbon_market', 'Réglementaire'))
+    df_table['Implementation'] = df_table['Implementation'].apply(lambda x: translate_val(x, is_fr))
+    
+    df_table.columns = [t('ID', 'ID'), t('Nom du Cadre', 'Framework Name'), t('Source', 'Data Source'), t('Score de Correspondance (%)', 'Matching Score (%)'), t('Objectif', 'Purpose'), t('Implémentation', 'Implementation')]
     
     st.dataframe(
         df_table,
         column_config={
-            "Matching Score (%)": st.column_config.ProgressColumn(
-                "Matching Score (%)",
-                help="Percentage of validated criteria",
+            t('Score de Correspondance (%)', 'Matching Score (%)'): st.column_config.ProgressColumn(
+                t('Score de Correspondance (%)', 'Matching Score (%)'),
+                help=t("Pourcentage de critères validés", "Percentage of validated criteria"),
                 format="%d%%",
                 min_value=0,
                 max_value=100
             ),
-            "ID": st.column_config.TextColumn("ID", width="small"),
-            "Framework Name": st.column_config.TextColumn("Framework Name", width="medium"),
-            "Data Source": st.column_config.TextColumn("Data Source", width="small"),
-            "Purpose": st.column_config.TextColumn("Purpose", width="small"),
-            "Implementation": st.column_config.TextColumn("Implementation", width="small"),
+            t('ID', 'ID'): st.column_config.TextColumn(t('ID', 'ID'), width="small"),
+            t('Nom du Cadre', 'Framework Name'): st.column_config.TextColumn(t('Nom du Cadre', 'Framework Name'), width="medium"),
+            t('Source', 'Data Source'): st.column_config.TextColumn(t('Source', 'Data Source'), width="small"),
+            t('Objectif', 'Purpose'): st.column_config.TextColumn(t('Objectif', 'Purpose'), width="small"),
+            t('Implémentation', 'Implementation'): st.column_config.TextColumn(t('Implémentation', 'Implementation'), width="small"),
         },
         hide_index=True,
         use_container_width=True
@@ -1121,153 +1506,35 @@ elif mode_clean == 'Decision Tool':
     
     # Select an MRV to view its profile
     if not df_results.empty:
-        st.markdown(f"<h3>Detailed profile of the selected framework</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3>{t('Profil détaillé du cadre sélectionné', 'Detailed profile of the selected framework')}</h3>", unsafe_allow_html=True)
         
         mrv_options = df_results['ID_MRV'] + " - " + df_results['MRV_Name']
-        selected_mrv_str = st.selectbox("Select a framework to inspect:", mrv_options)
+        selected_mrv_str = st.selectbox(t("Sélectionnez un cadre à inspecter :", "Select a framework to inspect:"), mrv_options)
         
         selected_mrv_id = selected_mrv_str.split(" - ")[0]
         mrv_data = df_results[df_results['ID_MRV'] == selected_mrv_id].iloc[0]
         
         # Draw detailed profile
-        with st.container():
-            # Determine source badge class
-            src = mrv_data['Source']
-            badge_class = "badge-lit"
-            if src == 'Webscraping': badge_class = "badge-web"
-            elif src == 'AI Search': badge_class = "badge-ai"
+        # Technical profile layout (Two-column: Pokemon Card & Technical Specifications)
+        col_card, col_details = st.columns([2, 3])
+        
+        with col_card:
+            # Custom Pokemon card HTML display
+            card_html = generate_pokemon_card_html(mrv_data, is_fr=is_fr)
+            st.markdown(card_html, unsafe_allow_html=True)
             
-            if JPG_FILES:
-                img_idx = abs(hash(str(mrv_data['ID_MRV']))) % len(JPG_FILES)
-                img_name = JPG_FILES[img_idx]
-                img_path = os.path.join(BASE_DIR, 'app_illustrations', img_name)
-                
-                col_card_text, col_card_img = st.columns([3, 1])
-                with col_card_text:
-                    st.markdown(f"""
-                    <div class="mrv-profile-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 24px; font-weight: bold; color: #2C5E43;">{mrv_data['MRV_Name']}</span>
-                            <span class="mrv-badge {badge_class}">{src}</span>
-                        </div>
-                        <div style="color: #666; margin-top: 4px;">Framework ID: <b>{mrv_data['ID_MRV']}</b></div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_card_img:
-                    st.image(img_path, caption=f"Illustr. {mrv_data['ID_MRV']}", use_column_width=True)
-            else:
-                st.markdown(f"""
-                <div class="mrv-profile-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 24px; font-weight: bold; color: #2C5E43;">{mrv_data['MRV_Name']}</span>
-                        <span class="mrv-badge {badge_class}">{src}</span>
-                    </div>
-                    <div style="color: #666; margin-top: 4px;">Framework ID: <b>{mrv_data['ID_MRV']}</b></div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Tabs for structuring information
-            tab1, tab2, tab3, tab4 = st.tabs(["📝 General & Source", "🌍 Context & Stakeholders", "🔬 Monitoring", "📊 Reporting & Verification"])
-            
-            with tab1:
-                col_left, col_right = st.columns(2)
-                with col_left:
-                    st.write(f"**Publication / Source:** {mrv_data['Pub_Title']}")
-                    st.write(f"**Author / Platform:** {mrv_data['Pub_Author']}")
-                    st.write(f"**Year:** {mrv_data['Pub_Year']}")
-                with col_right:
-                    st.write(f"**Country:** {mrv_data.get('Country', 'N/A')}")
-                    st.write(f"**Continent:** {mrv_data.get('Continent', 'N/A')}")
-                    if mrv_data['Pub_Link']:
-                        st.markdown(f"[🔗 Access Original Source]({mrv_data['Pub_Link']})")
-                    else:
-                        st.write("*Source link unavailable*")
-                        
-            with tab2:
-                col_left, col_right = st.columns(2)
-                with col_left:
-                    st.markdown("<div class='section-header'>Land Uses</div>", unsafe_allow_html=True)
-                    st.markdown(f"- Agriculture: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Agriculture', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Forest: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Forest') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Forest') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Forest', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Urban: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Urban') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Urban') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Urban', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Degraded Land: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Degraded_land', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Peatland / Wetland: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Peatland_Wetland', 'No')}</span>", unsafe_allow_html=True)
-                    if mrv_data.get('Land_use_Others_ Precision') and str(mrv_data['Land_use_Others_ Precision']).lower() != 'nan':
-                        st.write(f"- Other details: *{mrv_data['Land_use_Others_ Precision']}*")
-                        
-                    st.markdown("<div class='section-header'>Application Scale</div>", unsafe_allow_html=True)
-                    st.markdown(f"- Local: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Local') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Local') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Local', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Regional: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Regional') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Regional') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Regional', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- National: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_National') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_National') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_National', 'No')}</span>", unsafe_allow_html=True)
-                    st.markdown(f"- Global: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Global') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Global') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Global', 'No')}</span>", unsafe_allow_html=True)
-
-                with col_right:
-                    st.markdown("<div class='section-header'>Objectives & Drivers</div>", unsafe_allow_html=True)
-                    st.write(f"**Market purpose:** {mrv_data['Purpose']}")
-                    st.write(f"**Implementation status:** {mrv_data['Implementation']}")
-                    
-                    # Find active drivers
-                    active_drivers = []
-                    for c in mrv_data.index:
-                        if c.startswith('Driver_') and mrv_data[c] == 'Yes':
-                            active_drivers.append(c.replace('Driver_', '').replace('_', ' '))
-                    if active_drivers:
-                        st.write("**Targeted Agricultural Practices / Drivers:**")
-                        for d in active_drivers:
-                            st.markdown(f"- {d.capitalize()}")
-                    else:
-                        st.write("*No specific driver listed*")
-                        
-            with tab3:
-                col_left, col_right = st.columns(2)
-                with col_left:
-                    st.markdown("<div class='section-header'>Measured Soil Parameters</div>", unsafe_allow_html=True)
-                    active_params = []
-                    for c in mrv_data.index:
-                        if c.startswith('Parameter_') and mrv_data[c] == 'Yes':
-                            active_params.append(c.replace('Parameter_', '').replace('_', ' '))
-                    if active_params:
-                        for p in active_params:
-                            st.markdown(f"- {p.capitalize()}")
-                    else:
-                        st.write("*No standard parameter specified*")
-                        
-                with col_right:
-                    st.markdown("<div class='section-header'>Used Data Types</div>", unsafe_allow_html=True)
-                    st.markdown(f"- Management surveys: {mrv_data.get('Data_Land_Management', 'No')}")
-                    st.markdown(f"- Satellite / spatial imagery: {mrv_data.get('Data_Spatial_images', 'No')}")
-                    st.markdown(f"- Physical soil samples: {mrv_data.get('Data_Soil_samples', 'No')}")
-                    st.markdown(f"- Modelling: {mrv_data.get('Data_Modelling', 'No')}")
-                    
-                    st.markdown("<div class='section-header'>Sampling Plan</div>", unsafe_allow_html=True)
-                    st.write(f"**Monitoring frequency:** {mrv_data['Monitoring_frequency']}")
-                    st.write(f"**Average plot area:** {mrv_data.get('Plot_Area', 'N/A')} {mrv_data.get('Plot_Area_Unit', '')}")
-                    st.write(f"**Standardized methodology:** {mrv_data.get('Methodology_Standard', 'No')}")
-
-            with tab4:
-                col_left, col_right = st.columns(2)
-                with col_left:
-                    st.markdown("<div class='section-header'>Reporting & Uncertainty</div>", unsafe_allow_html=True)
-                    st.write(f"**Report format:** Standard document: {mrv_data.get('Format_Document', 'No')} | Online: {mrv_data.get('Format_Online', 'No')}")
-                    st.write(f"**Uncertainty calculation method:** {mrv_data['Uncertainty']}")
-                    st.write(f"**Threshold calculation method:** {mrv_data['Threshold']}")
-                    
-                with col_right:
-                    st.markdown("<div class='section-header'>Verification</div>", unsafe_allow_html=True)
-                    st.write(f"**Action-based scheme:** {mrv_data.get('Action_based', 'No')}")
-                    st.write(f"**Result-based scheme:** {mrv_data.get('Result_based', 'No')}")
-                    st.write(f"**Auditor:** {mrv_data['Auditor']}")
-                    st.write(f"**Data sharing:** {mrv_data.get('Data_Sharing', 'No')}")
+        with col_details:
+            render_mrv_details(mrv_data, is_fr=is_fr)
 
 # ----------------- POKEDEX (MRV EXPLORER) PAGE -----------------
 elif mode_clean == 'Pokedex':
-    st.markdown(f"<h1>Framework Explorer (MRV Pokedex)</h1>", unsafe_allow_html=True)
-    st.markdown("View and explore all 96 MRV frameworks in our database.")
+    st.markdown(f"<h1>{t('Explorateur de Cadres (Pokedex MRV)', 'Framework Explorer (MRV Pokedex)')}</h1>", unsafe_allow_html=True)
+    st.markdown(t("Visualisez et explorez l'ensemble des 96 cadres MRV de notre base de données.", "View and explore all 96 MRV frameworks in our database."))
     st.divider()
     
     # Framework Selector
     mrv_options = combined_df['ID_MRV'] + " - " + combined_df['MRV_Name']
-    selected_mrv_str = st.selectbox("Select a framework to inspect:", mrv_options)
+    selected_mrv_str = st.selectbox(t("Sélectionnez un cadre à inspecter :", "Select a framework to inspect:"), mrv_options)
     
     selected_mrv_id = selected_mrv_str.split(" - ")[0]
     mrv_data = combined_df[combined_df['ID_MRV'] == selected_mrv_id].iloc[0]
@@ -1277,106 +1544,16 @@ elif mode_clean == 'Pokedex':
     
     with col_card:
         # Custom Pokemon card HTML display
-        card_html = generate_pokemon_card_html(mrv_data)
+        card_html = generate_pokemon_card_html(mrv_data, is_fr=is_fr)
         st.markdown(card_html, unsafe_allow_html=True)
         
     with col_details:
-        # Tabs for technical specs
-        tab1, tab2, tab3, tab4 = st.tabs(["📝 General & Source", "🌍 Context & Stakeholders", "🔬 Monitoring", "📊 Reporting & Verification"])
-        
-        with tab1:
-            col_left, col_right = st.columns(2)
-            with col_left:
-                st.write(f"**Publication / Source:** {mrv_data['Pub_Title']}")
-                st.write(f"**Author / Platform:** {mrv_data['Pub_Author']}")
-                st.write(f"**Year:** {mrv_data['Pub_Year']}")
-            with col_right:
-                st.write(f"**Country:** {mrv_data.get('Country', 'N/A')}")
-                st.write(f"**Continent:** {mrv_data.get('Continent', 'N/A')}")
-                if mrv_data['Pub_Link']:
-                    st.markdown(f"[🔗 Access Original Source]({mrv_data['Pub_Link']})")
-                else:
-                    st.write("*Source link unavailable*")
-                    
-        with tab2:
-            col_left, col_right = st.columns(2)
-            with col_left:
-                st.markdown("<div class='section-header'>Land Uses</div>", unsafe_allow_html=True)
-                st.markdown(f"- Agriculture: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Agriculture') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Agriculture', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Forest: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Forest') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Forest') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Forest', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Urban: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Urban') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Urban') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Urban', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Degraded Land: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Degraded_land') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Degraded_land', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Peatland / Wetland: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Land_use_Peatland_Wetland') == 'Yes' else '#C62828'}'>{mrv_data.get('Land_use_Peatland_Wetland', 'No')}</span>", unsafe_allow_html=True)
-                if mrv_data.get('Land_use_Others_ Precision') and str(mrv_data['Land_use_Others_ Precision']).lower() != 'nan':
-                    st.write(f"- Other details: *{mrv_data['Land_use_Others_ Precision']}*")
-                    
-                st.markdown("<div class='section-header'>Application Scale</div>", unsafe_allow_html=True)
-                st.markdown(f"- Local: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Local') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Local') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Local', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Regional: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Regional') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Regional') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Regional', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- National: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_National') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_National') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_National', 'No')}</span>", unsafe_allow_html=True)
-                st.markdown(f"- Global: <span class='badge-yes' style='background-color: {'#E8F5E9' if mrv_data.get('Scale_Global') == 'Yes' else '#FFEBEE'}; color: {'#1B5E20' if mrv_data.get('Scale_Global') == 'Yes' else '#C62828'}'>{mrv_data.get('Scale_Global', 'No')}</span>", unsafe_allow_html=True)
-
-            with col_right:
-                st.markdown("<div class='section-header'>Objectives & Drivers</div>", unsafe_allow_html=True)
-                st.write(f"**Market purpose:** {mrv_data['Purpose']}")
-                st.write(f"**Implementation status:** {mrv_data['Implementation']}")
-                
-                active_drivers = []
-                for c in mrv_data.index:
-                    if c.startswith('Driver_') and mrv_data[c] == 'Yes':
-                        active_drivers.append(c.replace('Driver_', '').replace('_', ' '))
-                if active_drivers:
-                    st.write("**Targeted Agricultural Practices / Drivers:**")
-                    for d in active_drivers:
-                        st.markdown(f"- {d.capitalize()}")
-                else:
-                    st.write("*No specific driver listed*")
-                    
-        with tab3:
-            col_left, col_right = st.columns(2)
-            with col_left:
-                st.markdown("<div class='section-header'>Measured Soil Parameters</div>", unsafe_allow_html=True)
-                active_params = []
-                for c in mrv_data.index:
-                    if c.startswith('Parameter_') and mrv_data[c] == 'Yes':
-                        active_params.append(c.replace('Parameter_', '').replace('_', ' '))
-                if active_params:
-                    for p in active_params:
-                        st.markdown(f"- {p.capitalize()}")
-                else:
-                    st.write("*No standard parameter specified*")
-                    
-            with col_right:
-                st.markdown("<div class='section-header'>Used Data Types</div>", unsafe_allow_html=True)
-                st.markdown(f"- Management surveys: {mrv_data.get('Data_Land_Management', 'No')}")
-                st.markdown(f"- Satellite / spatial imagery: {mrv_data.get('Data_Spatial_images', 'No')}")
-                st.markdown(f"- Physical soil samples: {mrv_data.get('Data_Soil_samples', 'No')}")
-                st.markdown(f"- Modelling: {mrv_data.get('Data_Modelling', 'No')}")
-                
-                st.markdown("<div class='section-header'>Sampling Plan</div>", unsafe_allow_html=True)
-                st.write(f"**Monitoring frequency:** {mrv_data['Monitoring_frequency']}")
-                st.write(f"**Average plot area:** {mrv_data.get('Plot_Area', 'N/A')} {mrv_data.get('Plot_Area_Unit', '')}")
-                st.write(f"**Standardized methodology:** {mrv_data.get('Methodology_Standard', 'No')}")
-
-        with tab4:
-            col_left, col_right = st.columns(2)
-            with col_left:
-                st.markdown("<div class='section-header'>Reporting & Uncertainty</div>", unsafe_allow_html=True)
-                st.write(f"**Report format:** Standard document: {mrv_data.get('Format_Document', 'No')} | Online: {mrv_data.get('Format_Online', 'No')}")
-                st.write(f"**Uncertainty calculation method:** {mrv_data['Uncertainty']}")
-                st.write(f"**Threshold calculation method:** {mrv_data['Threshold']}")
-                
-            with col_right:
-                st.markdown("<div class='section-header'>Verification</div>", unsafe_allow_html=True)
-                st.write(f"**Action-based scheme:** {mrv_data.get('Action_based', 'No')}")
-                st.write(f"**Result-based scheme:** {mrv_data.get('Result_based', 'No')}")
-                st.write(f"**Auditor:** {mrv_data['Auditor']}")
-                st.write(f"**Data sharing:** {mrv_data.get('Data_Sharing', 'No')}")
+        render_mrv_details(mrv_data, is_fr=is_fr)
 
 # ----------------- PAGE ARTICLES (BIBLIOGRAPHY) -----------------
 elif mode_clean == 'Articles':
-    st.markdown(f"<h1>Publications & Sources Library</h1>", unsafe_allow_html=True)
-    st.markdown("Browse and search original publications and websites referenced in our database.")
+    st.markdown(f"<h1>{t('Bibliothèque des Publications & Sources', 'Publications & Sources Library')}</h1>", unsafe_allow_html=True)
+    st.markdown(t("Parcourez et recherchez les publications originales et les sites web référencés dans notre base de données.", "Browse and search original publications and websites referenced in our database."))
     st.divider()
     
     # Extract unique publications
@@ -1385,9 +1562,12 @@ elif mode_clean == 'Articles':
     # Filters
     col_f1, col_f2 = st.columns(2)
     with col_f1:
-        search_pub = st.text_input("🔍 Search for a publication...", placeholder="Title, author, platform...")
+        search_pub = st.text_input(t("🔍 Rechercher une publication...", "🔍 Search for a publication..."), placeholder=t("Titre, auteur, plateforme...", "Title, author, platform..."))
     with col_f2:
-        source_filter = st.selectbox("Filter by source type:", ['All', 'Literature (Scopus)', 'Webscraping', 'AI Search'])
+        source_options = ['All', 'Literature (Scopus)', 'Webscraping', 'AI Search']
+        translated_sources = [t("Tous", "All"), t("Littérature (Scopus)", "Literature (Scopus)"), t("Webscraping", "Webscraping"), t("Recherche IA", "AI Search")]
+        source_filter_idx = st.selectbox(t("Filtrer par type de source :", "Filter by source type:"), range(len(source_options)), format_func=lambda x: translated_sources[x])
+        source_filter = source_options[source_filter_idx]
         
     filtered_pubs = pub_df.copy()
     if search_pub:
@@ -1398,7 +1578,7 @@ elif mode_clean == 'Articles':
     if source_filter != 'All':
         filtered_pubs = filtered_pubs[filtered_pubs['Source'] == source_filter]
         
-    st.markdown(f"<h4>{len(filtered_pubs)} publications or sources found</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4>{t(f'{len(filtered_pubs)} publications ou sources trouvées', f'{len(filtered_pubs)} publications or sources found')}</h4>", unsafe_allow_html=True)
     st.write("")
     
     for idx, row in filtered_pubs.iterrows():
@@ -1420,10 +1600,10 @@ elif mode_clean == 'Articles':
                 f'<div style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">'
                 f'<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">'
                 f'{title_html}'
-                f'<span class="mrv-badge {badge_class}" style="white-space: nowrap;">{src}</span>'
+                f'<span class="mrv-badge {badge_class}" style="white-space: nowrap;">{translate_val(src, is_fr)}</span>'
                 f'</div>'
                 f'<div style="color: var(--text-muted); margin-top: 6px; font-size: 13px;">'
-                f'Author/Publisher: <b style="color: var(--text-color);">{row["Pub_Author"]}</b> &nbsp;|&nbsp; Year: <b style="color: var(--text-color);">{row["Pub_Year"]}</b>'
+                f'{t("Auteur/Éditeur", "Author/Publisher")}: <b style="color: var(--text-color);">{row["Pub_Author"]}</b> &nbsp;|&nbsp; {t("Année", "Year")}: <b style="color: var(--text-color);">{row["Pub_Year"]}</b>'
                 f'</div>'
                 f'</div>'
             )
@@ -1431,16 +1611,19 @@ elif mode_clean == 'Articles':
             
             # Show associated frameworks in an expander
             mrv_names_list = ", ".join([f"{m['ID_MRV']} ({m['MRV_Name']})" for i, m in associated_mrvs.iterrows()])
-            with st.expander(f"🔍 Associated MRV Frameworks ({len(associated_mrvs)})"):
-                st.write(f"**List of frameworks:** {mrv_names_list}")
+            with st.expander(t(f"🔍 Cadres MRV Associés ({len(associated_mrvs)})", f"🔍 Associated MRV Frameworks ({len(associated_mrvs)})")):
+                st.write(f"**{t('Liste des cadres :', 'List of frameworks:')}** {mrv_names_list}")
                 
                 # Summary table for associated frameworks
                 df_assoc_table = associated_mrvs[['ID_MRV', 'MRV_Name', 'Purpose', 'Implementation']].copy()
-                df_assoc_table.columns = ['ID', 'Framework Name', 'Purpose', 'Implementation']
+                df_assoc_table['Purpose'] = df_assoc_table['Purpose'].apply(lambda x: translate_val(x, is_fr).replace('Voluntary_carbon_market', 'Volontaire').replace('Compliance_carbon_market', 'Réglementaire'))
+                df_assoc_table['Implementation'] = df_assoc_table['Implementation'].apply(lambda x: translate_val(x, is_fr))
+                
+                df_assoc_table.columns = [t('ID', 'ID'), t('Nom du Cadre', 'Framework Name'), t('Objectif', 'Purpose'), t('Implémentation', 'Implementation')]
                 st.dataframe(df_assoc_table, hide_index=True, use_container_width=True)
                 
                 if row['Pub_Link']:
-                    st.markdown(f"[🔗 Open source online]({row['Pub_Link']})")
+                    st.markdown(f"[{t('🔗 Ouvrir la source en ligne', '🔗 Open source online')}]({row['Pub_Link']})")
 
 # ----------------- PAGE MRV (GUIDE DES FILTRES) -----------------
 elif mode_clean == 'MRV Guide':
@@ -1505,9 +1688,163 @@ elif mode_clean == 'MRV Guide':
                 "type": "binary"
             },
             {
+                "name": "Continental Scale",
+                "col": "Scale_Continental",
+                "desc": "The methodology is applied across a continent's scale.",
+                "type": "binary"
+            },
+            {
                 "name": "Global Scale",
                 "col": "Scale_Global",
                 "desc": "The monitoring protocol is universal, applicable at an international or global level.",
+                "type": "binary"
+            }
+        ],
+        "🛠️ Drivers / Management Changes": [
+            {
+                "name": "Agricultural practices",
+                "col": "Driver_Agricultural_practices",
+                "desc": "Management changes involving agricultural practices (e.g. crop rotation, cover crops, tillage changes).",
+                "type": "binary"
+            },
+            {
+                "name": "Afforestation / Reforestation",
+                "col": "Driver_Afforestation_Reforestation",
+                "desc": "Management changes involving afforestation or reforestation (planting trees).",
+                "type": "binary"
+            },
+            {
+                "name": "Biochar",
+                "col": "Driver_Biochar",
+                "desc": "Management changes involving application of biochar to soil.",
+                "type": "binary"
+            },
+            {
+                "name": "Forest management",
+                "col": "Driver_Forest_management",
+                "desc": "Management changes involving sustainable forestry or wood harvesting management.",
+                "type": "binary"
+            },
+            {
+                "name": "Conservation",
+                "col": "Driver_Conservation",
+                "desc": "Management changes involving species or habitat conservation.",
+                "type": "binary"
+            },
+            {
+                "name": "Deforestation",
+                "col": "Driver_Deforestation",
+                "desc": "Management changes aimed at reducing/preventing deforestation.",
+                "type": "binary"
+            },
+            {
+                "name": "Restoration",
+                "col": "Driver_Restoration",
+                "desc": "Management changes focused on the ecological restoration of degraded natural habitats.",
+                "type": "binary"
+            },
+            {
+                "name": "Weathering",
+                "col": "Driver_Weathering",
+                "desc": "Management changes involving enhanced rock weathering applications.",
+                "type": "binary"
+            },
+            {
+                "name": "Grazing",
+                "col": "Driver_Grazing",
+                "desc": "Management changes involving livestock grazing or pasture systems.",
+                "type": "binary"
+            },
+            {
+                "name": "Irrigation",
+                "col": "Driver_Irrigation",
+                "desc": "Management changes involving irrigation infrastructure or practice optimization.",
+                "type": "binary"
+            },
+            {
+                "name": "Land conversion",
+                "col": "Driver_Land_conversion",
+                "desc": "Management changes involving direct land use conversion.",
+                "type": "binary"
+            },
+            {
+                "name": "Rewetting",
+                "col": "Driver_Rewetting",
+                "desc": "Management changes involving rewetting of peatlands or organic soils.",
+                "type": "binary"
+            },
+            {
+                "name": "Fire management",
+                "col": "Driver_Fire_management",
+                "desc": "Management changes involving controlled burning or fire protection strategies.",
+                "type": "binary"
+            }
+        ],
+        "💼 Stakeholder Occupations": [
+            {
+                "name": "Farmers",
+                "col": "Occupation_Farmers",
+                "desc": "Farmers implementing soil management practices.",
+                "type": "binary"
+            },
+            {
+                "name": "Foresters & Forester Associations",
+                "col": "Occupation_Foresters_Forester_Associations",
+                "desc": "Foresters or forest manager cooperatives.",
+                "type": "binary"
+            },
+            {
+                "name": "Public Administrators",
+                "col": "Occupation_Public_Administrators",
+                "desc": "Governmental representatives or public policy makers.",
+                "type": "binary"
+            },
+            {
+                "name": "Educational & Research Institutions",
+                "col": "Occupation_Educational_Institutions_Research",
+                "desc": "Universities, researchers, or extension services.",
+                "type": "binary"
+            },
+            {
+                "name": "NGOs",
+                "col": "Occupation_NGOs",
+                "desc": "Non-governmental organizations operating in climate or soil preservation.",
+                "type": "binary"
+            },
+            {
+                "name": "Agroindustry",
+                "col": "Occupation_Agroindustry",
+                "desc": "Agricultural manufacturers, processors, and food brands.",
+                "type": "binary"
+            },
+            {
+                "name": "Forestry Companies",
+                "col": "Occupation_Forestry_Companies",
+                "desc": "Commercial logging or forestry operations.",
+                "type": "binary"
+            },
+            {
+                "name": "Consultancy",
+                "col": "Occupation_Consultancy",
+                "desc": "Independent carbon or agronomy consultants.",
+                "type": "binary"
+            },
+            {
+                "name": "Project Developer",
+                "col": "Occupation_Project_developer",
+                "desc": "Developers designing and managing VCM carbon credit projects.",
+                "type": "binary"
+            },
+            {
+                "name": "Other Companies",
+                "col": "Occupation_Other_companies",
+                "desc": "Other commercial companies and corporate buyers.",
+                "type": "binary"
+            },
+            {
+                "name": "Software Developers",
+                "col": "Occupation_Software_developers",
+                "desc": "Technology companies building platforms and MRV software.",
                 "type": "binary"
             }
         ],
@@ -1543,9 +1880,129 @@ elif mode_clean == 'MRV Guide':
                 "type": "binary"
             },
             {
+                "name": "Soil Fauna",
+                "col": "Parameter_Soil_Fauna",
+                "desc": "Measurement of soil fauna density, diversity, and biological quality.",
+                "type": "binary"
+            },
+            {
                 "name": "Greenhouse Gas Fluxes (GHG)",
                 "col": "Parameter_GHG",
                 "desc": "Measurement or modelling of CO2, N2O, or CH4 emissions associated with soils.",
+                "type": "binary"
+            },
+            {
+                "name": "Oxygen Content",
+                "col": "Parameter_Oxygen_content",
+                "desc": "Measurement of soil aeration and oxygen levels.",
+                "type": "binary"
+            },
+            {
+                "name": "Clay Mineralogy",
+                "col": "Parameter_Clay_mineralogy",
+                "desc": "Physicochemical analysis of clay types and minerals in the soil.",
+                "type": "binary"
+            },
+            {
+                "name": "CEC (Cation Exchange Capacity)",
+                "col": "Parameter_CEC",
+                "desc": "Measurement of soil cation exchange capacity (nutrient retention capacity).",
+                "type": "binary"
+            },
+            {
+                "name": "Particle Size Distribution / Texture",
+                "col": "Parameter_Particle_size_distribution_Texture",
+                "desc": "Quantitative distribution of sand, silt, and clay particles (soil texture).",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Porosity",
+                "col": "Parameter_Soil_porosity",
+                "desc": "Measurement of soil pore space volume and structure.",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Diffusivity",
+                "col": "Parameter_Soil_diffusivity",
+                "desc": "Measurement of gas/solute diffusion properties in soil.",
+                "type": "binary"
+            },
+            {
+                "name": "Aggregate Stability",
+                "col": "Parameter_Aggregate_stability",
+                "desc": "Measurement of soil structural stability and resistance to erosion/slaking.",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Compaction / Bulk Density",
+                "col": "Parameter_Soil_compaction_Bulk_density",
+                "desc": "Measurement of soil physical density and degree of compaction.",
+                "type": "binary"
+            },
+            {
+                "name": "Nutrient Availability",
+                "col": "Parameter_Nutrient_availability",
+                "desc": "Measurement of plant-available nutrients (Nitrogen, Phosphorus, Potassium, etc.).",
+                "type": "binary"
+            },
+            {
+                "name": "Pollutant Concentration",
+                "col": "Parameter_Pollutant_concentration",
+                "desc": "Measurement of heavy metals, pesticides, or other toxic pollutants in soil.",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Depth",
+                "col": "Parameter_Soil_depth",
+                "desc": "Measurement of total depth of the topsoil or soil profile.",
+                "type": "binary"
+            },
+            {
+                "name": "Peat Depth",
+                "col": "Parameter_Peat_depth",
+                "desc": "Measurement of peat deposit depth/thickness in organic soils.",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Color",
+                "col": "Parameter_Soil_color",
+                "desc": "Visual or spectrophotometric classification of soil color.",
+                "type": "binary"
+            },
+            {
+                "name": "Soil Type",
+                "col": "Parameter_Soil_type",
+                "desc": "Pedological classification of soil types.",
+                "type": "binary"
+            },
+            {
+                "name": "Subsidence",
+                "col": "Parameter_Subsidence",
+                "desc": "Measurement of peat subsidence or soil surface level changes over time.",
+                "type": "binary"
+            },
+            {
+                "name": "CaCO3",
+                "col": "Parameter_CaCO3",
+                "desc": "Measurement of calcium carbonate content.",
+                "type": "binary"
+            },
+            {
+                "name": "Electrical Conductivity",
+                "col": "Parameter_Electrical_conductivity",
+                "desc": "Measurement of soil salinity and conductivity.",
+                "type": "binary"
+            },
+            {
+                "name": "Water Holding Capacity",
+                "col": "Parameter_Water_holding_capacity",
+                "desc": "Measurement of soil water retention and holding capacity.",
+                "type": "binary"
+            },
+            {
+                "name": "Infiltration Rate",
+                "col": "Parameter_Infiltration_rate",
+                "desc": "Measurement of water infiltration speed into the soil surface.",
                 "type": "binary"
             }
         ],
@@ -1573,23 +2030,27 @@ elif mode_clean == 'MRV Guide':
                 "col": "Data_Modelling",
                 "desc": "Mathematical and computer models simulating variations in soil organic carbon over time.",
                 "type": "binary"
-            }
-        ],
-        "📝 Reporting & Uncertainty": [
-            {
-                "name": "Uncertainty Assessment Method",
-                "col": "Uncertainty",
-                "desc": "Statistical algorithm used to estimate error margins of the sequestered carbon quantity (e.g., Bayesian analysis, Monte Carlo simulations, quantiles).",
-                "type": "categorical"
             },
             {
-                "name": "Threshold Calculation",
-                "col": "Threshold",
-                "desc": "Method for establishing baseline reference or threshold values (fixed literature thresholds, regional distribution, relative changes).",
-                "type": "categorical"
+                "name": "On-site Imagery (Soil Scanner)",
+                "col": "Data_on_site_images",
+                "desc": "Use of on-site scanners, portable spectrometers, or field photos for direct soil characterization.",
+                "type": "binary"
             }
         ],
-        "🔒 Verification Schemes & Governance": [
+        "🔒 Reporting & Verification Schemes": [
+            {
+                "name": "Standard Document Report",
+                "col": "Format_Document",
+                "desc": "Whether the results are reported in a standard PDF or document report format.",
+                "type": "binary"
+            },
+            {
+                "name": "Online Platform Entry",
+                "col": "Format_Online",
+                "desc": "Whether reporting is done directly via an online database or web platform.",
+                "type": "binary"
+            },
             {
                 "name": "Action-based Verification",
                 "col": "Action_based",
@@ -1603,18 +2064,6 @@ elif mode_clean == 'MRV Guide':
                 "type": "binary"
             },
             {
-                "name": "Auditor Type",
-                "col": "Auditor",
-                "desc": "Indicates whether the final validation is performed by an independent third-party body (External) or internally (Internal).",
-                "type": "categorical"
-            },
-            {
-                "name": "Data Sharing",
-                "col": "Data_Sharing",
-                "desc": "Policy for sharing obtained data: open/shared access (Yes) or confidential/private (No).",
-                "type": "categorical"
-            },
-            {
                 "name": "Implementation Status",
                 "col": "Implementation",
                 "desc": "Maturity status of the framework: already operational and applied in the field (Implemented) or still theoretical (Project).",
@@ -1623,14 +2072,77 @@ elif mode_clean == 'MRV Guide':
         ]
     }
     
+    # Translation dictionaries for guide names & descriptions
+    GUIDE_TRANS = {
+        'Land_use_Agriculture': ("Agriculture", "Détermine si le protocole de suivi MRV s'applique aux cultures, à l'élevage ou au maraîchage."),
+        'Land_use_Forest': ("Forêt", "Détermine si le cadre s'applique aux zones forestières ou boisées, ou aux projets d'agroforesterie."),
+        'Land_use_Urban': ("Urbain", "Indique si le protocole peut être utilisé en zone urbaine ou périurbaine (sols anthropiques)."),
+        'Land_use_Degraded_land': ("Terres Dégradées", "Indique si la méthode est spécifique à la restauration écologique de sols dégradés, miniers ou contaminés."),
+        'Land_use_Peatland_Wetland': ("Tourbières & Zones Humides", "Détermine si le cadre est adapté au suivi des zones humides ou des tourbières (sols gorgés d'eau, riches en carbone)."),
+        
+        'Scale_Local': ("Échelle Locale", "Le suivi s'applique localement, généralement à l'échelle de la parcelle ou de l'exploitation."),
+        'Scale_Regional': ("Échelle Régionale", "Le suivi est réalisé à l'échelle d'un grand territoire, d'une région ou d'un bassin versant."),
+        'Scale_National': ("Échelle Nationale", "La méthodologie est conçue pour les inventaires nationaux de GES ou les politiques publiques à l'échelle d'un pays."),
+        'Scale_Continental': ("Échelle Continentale", "La méthodologie s'applique à l'échelle d'un continent entier."),
+        'Scale_Global': ("Échelle Globale", "Le protocole de suivi est universel, applicable au niveau international ou mondial."),
+        
+        'Data_Land_Management': ("Données de gestion des terres", "Données déclaratives recueillies auprès des agriculteurs (historique des cultures, travail du sol, couverts)."),
+        'Data_Spatial_images': ("Imagerie satellite / spatiale", "Utilisation d'images satellites ou de drones pour cartographier ou surveiller à distance l'état des cultures et du sol."),
+        'Data_Soil_samples': ("Prélèvements physiques de sol", "Prélèvement physique de carottes de sol sur le terrain suivi d'analyses physico-chimiques en laboratoire."),
+        'Data_Modelling': ("Modélisation numérique", "Modèles mathématiques et informatiques simulant l'évolution du carbone organique du sol dans le temps."),
+        'Data_on_site_images': ("Scanner de sol sur site", "Utilisation de scanners sur site, de spectromètres portables ou de photos de terrain pour caractériser directement le sol."),
+        
+        'Format_Document': ("Rapport document standard", "Indique si les résultats sont rapportés sous forme de document ou rapport standard (PDF, Doc)."),
+        'Format_Online': ("Saisie sur plateforme en ligne", "Indique si le reporting se fait directement via une base de données ou un portail web en ligne."),
+        'Action_based': ("Vérification basée sur les actions", "Validation conditionnée au respect de pratiques culturales recommandées (ex: semis de couverts) sans mesurer le stock final."),
+        'Result_based': ("Vérification basée sur les résultats", "Validation conditionnée aux résultats mesurés in-situ (ex: tonnes de carbone stockées en plus)."),
+        'Implementation': ("Statut d'implémentation", "Maturité du cadre : opérationnel et appliqué sur le terrain (Implemented) ou encore théorique (Project).")
+    }
+
     # Display by sections
     for group_name, list_filters in filters_info.items():
-        st.markdown(f"<div class='section-header'>{group_name}</div>", unsafe_allow_html=True)
+        translated_group_name = group_name
+        if is_fr:
+            translated_group_name = group_name.replace("🌱 Context & Land Uses (Land Use)", "🌱 Contexte & Usages des Sols (Land Use)")
+            translated_group_name = translated_group_name.replace("🌍 Spatial Scales (Scale)", "🌍 Échelles Spatiales (Scale)")
+            translated_group_name = translated_group_name.replace("🛠️ Drivers / Management Changes", "🛠️ Leviers / Pratiques Agricoles")
+            translated_group_name = translated_group_name.replace("💼 Stakeholder Occupations", "💼 Acteurs & Occupations")
+            translated_group_name = translated_group_name.replace("🔬 Soil Parameters", "🔬 Paramètres du Sol")
+            translated_group_name = translated_group_name.replace("📊 Data Types Used (Data Type)", "📊 Types de Données Utilisés")
+            translated_group_name = translated_group_name.replace("🔒 Reporting & Verification Schemes", "🔒 Reporting & Schémas de Vérification")
+            
+        st.markdown(f"<div class='section-header'>{translated_group_name}</div>", unsafe_allow_html=True)
         
         for f in list_filters:
             col_name = f['col']
             desc = f['desc']
             name = f['name']
+            
+            # Localize names and descriptions dynamically
+            if is_fr:
+                if col_name in GUIDE_TRANS:
+                    name, desc = GUIDE_TRANS[col_name]
+                elif col_name.startswith('Driver_'):
+                    orig_key = col_name.replace('Driver_', '').replace('_', ' ')
+                    for eng, fr in DRIVER_MAP_KEYS_FR.items():
+                        if eng.lower().replace(' / ', ' ').replace(' ', '') == orig_key.lower().replace(' ', ''):
+                            name = fr
+                            break
+                    desc = f"Levier / Pratique : {name}."
+                elif col_name.startswith('Occupation_'):
+                    orig_key = col_name.replace('Occupation_', '').replace('_', ' ')
+                    for eng, fr in OCCUPATION_KEYS_FR.items():
+                        if eng.lower().replace(' & ', ' ').replace(' ', '') == orig_key.lower().replace(' ', ''):
+                            name = fr
+                            break
+                    desc = f"Acteur impliqué : {name}."
+                elif col_name.startswith('Parameter_'):
+                    orig_key = col_name.replace('Parameter_', '').replace('_', ' ')
+                    for eng, fr in PARAM_KEYS_FR.items():
+                        if eng.lower().replace(' (', ' ').replace(')', '').replace(' / ', ' ').replace(' ', '') == orig_key.lower().replace(' ', ''):
+                            name = fr
+                            break
+                    desc = f"Paramètre physico-chimique ou biologique du sol : {name}."
             
             # Dynamic stats based on combined_df
             if f['type'] == 'binary':
@@ -1643,9 +2155,9 @@ elif mode_clean == 'MRV Guide':
                 
                 stat_html = f"""
                 <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted);">
-                    Database distribution (out of {len(combined_df)} frameworks):
-                    <span class="mrv-badge badge-web" style="margin-left: 8px;">Yes: {yes_count} ({pct_yes}%)</span>
-                    <span class="mrv-badge badge-no" style="background-color: #581c1c; color: #fecaca; border: 1px solid #991b1b; padding: 4px 10px; border-radius: 20px;">No: {no_count} ({100 - pct_yes}%)</span>
+                    {t(f"Distribution de la base ({len(combined_df)} cadres) :", f"Database distribution (out of {len(combined_df)} frameworks):")}
+                    <span class="mrv-badge badge-web" style="margin-left: 8px;">{t("Oui", "Yes")}: {yes_count} ({pct_yes}%)</span>
+                    <span class="mrv-badge badge-no" style="background-color: #581c1c; color: #fecaca; border: 1px solid #991b1b; padding: 4px 10px; border-radius: 20px;">{t("Non", "No")}: {no_count} ({100 - pct_yes}%)</span>
                 </div>
                 """
             else:
@@ -1655,16 +2167,16 @@ elif mode_clean == 'MRV Guide':
                     badges = []
                     for val, count in val_counts.items():
                         pct = round((count / len(combined_df)) * 100)
-                        badges.append(f'<span class="mrv-badge badge-lit" style="background-color: #1e293b; color: #e2e8f0; border: 1px solid #475569; padding: 4px 10px; border-radius: 20px;">{val} : {count} ({pct}%)</span>')
+                        badges.append(f'<span class="mrv-badge badge-lit" style="background-color: #1e293b; color: #e2e8f0; border: 1px solid #475569; padding: 4px 10px; border-radius: 20px;">{translate_val(val, is_fr)} : {count} ({pct}%)</span>')
                     stat_html = f"""
                     <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px;">
-                        Database distribution: {"".join(badges)}
+                        {t("Distribution de la base :", "Database distribution:")} {"".join(badges)}
                     </div>
                     """
                 else:
                     stat_html = ""
             
-            with st.expander(f"🔍 {name} (Technical variable: `{col_name}`)"):
+            with st.expander(t(f"🔍 {name} (Variable technique : `{col_name}`)", f"🔍 {name} (Technical variable: `{col_name}`)")):
                 st.markdown(f"""
                 <div style="padding: 5px 0;">
                     <p style="margin: 0; font-size: 14px; line-height: 1.6; color: var(--text-color);">{desc}</p>

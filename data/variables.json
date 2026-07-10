@@ -1,52 +1,17 @@
 [
     {
-        "variable": "Person_1",
-        "field": "Article information",
-        "sub_field": "Person",
-        "modalities": "The first-name of the person",
-        "explanation": "First person in charge of the data extraction and verification"
+        "variable": "Action_based",
+        "field": "Verification",
+        "sub_field": "Verification scheme",
+        "modalities": "Yes or No",
+        "explanation": "Validation conditional on implementation of practices (action-based)"
     },
     {
-        "variable": "Person_2",
-        "field": "Article information",
-        "sub_field": "Person",
-        "modalities": "The first-name of the person",
-        "explanation": "Second person in charge of the data extraction and verification"
-    },
-    {
-        "variable": "ID_article",
-        "field": "Article information",
-        "sub_field": "Article",
-        "modalities": "AX with X the article number",
-        "explanation": "Number ID of the article"
-    },
-    {
-        "variable": "First_Author",
-        "field": "Article information",
-        "sub_field": "Article",
-        "modalities": "Last-name of the first author",
-        "explanation": "First author of the article"
-    },
-    {
-        "variable": "Title",
-        "field": "Article information",
-        "sub_field": "Article",
-        "modalities": "Article title",
-        "explanation": "Article title"
-    },
-    {
-        "variable": "Year",
-        "field": "Article information",
-        "sub_field": "Article",
-        "modalities": "Publication year of the article",
-        "explanation": "Publication year of the article"
-    },
-    {
-        "variable": "DOI",
-        "field": "Article information",
-        "sub_field": "Article",
-        "modalities": "Article's DOI",
-        "explanation": "Article's DOI"
+        "variable": "Auditor",
+        "field": "Verification",
+        "sub_field": "Auditor",
+        "modalities": "Internal or External",
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate if the auditor is an external organization or if the audit is done internally"
     },
     {
         "variable": "Availability",
@@ -56,11 +21,249 @@
         "explanation": "If we can download the article or not."
     },
     {
+        "variable": "Comments",
+        "field": "Additional information",
+        "sub_field": "Data Sharing",
+        "modalities": "Please add here any comments you would like to share",
+        "explanation": "-"
+    },
+    {
+        "variable": "Continent",
+        "field": "Additional information",
+        "sub_field": "Data Sharing",
+        "modalities": "Please write the name of the continent with a capital letter and _ between words. If several continent are involved, please seperate them with _",
+        "explanation": "The continent were the MRV is implemented or at least tested with it is still in development."
+    },
+    {
+        "variable": "Cost_MRV",
+        "field": "Stakeholders",
+        "sub_field": "Cost",
+        "modalities": "Please write it in number",
+        "explanation": "Please indicate the cost of the MRV"
+    },
+    {
+        "variable": "Cost_Unit",
+        "field": "Stakeholders",
+        "sub_field": "Cost",
+        "modalities": "Please write it with a capital letter and a _ between words",
+        "explanation": "Please indicate the unit i.e. the currency, the spatial area etc."
+    },
+    {
+        "variable": "Country",
+        "field": "Additional information",
+        "sub_field": "Data Sharing",
+        "modalities": "Please write the name of the country with a capital letter and _ between words. If several countries are involved, please seperate them with _",
+        "explanation": "The country were the MRV is implemented or at least tested with it is still in development."
+    },
+    {
+        "variable": "DOI",
+        "field": "Article information",
+        "sub_field": "Article",
+        "modalities": "Article's DOI",
+        "explanation": "Article's DOI"
+    },
+    {
+        "variable": "Data_Land_Management",
+        "field": "Monitoring",
+        "sub_field": "Data type",
+        "modalities": "Yes or No",
+        "explanation": "Please indicate if this data type is used."
+    },
+    {
+        "variable": "Data_Modelling",
+        "field": "Monitoring",
+        "sub_field": "Data type",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Data_Sharing",
+        "field": "Verification",
+        "sub_field": "Data Sharing",
+        "modalities": "Yes or No",
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate if the data could be shared (open-access or on demand) or if it is confidential."
+    },
+    {
+        "variable": "Data_Soil_samples",
+        "field": "Monitoring",
+        "sub_field": "Data type",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Data_Spatial_images",
+        "field": "Monitoring",
+        "sub_field": "Data type",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Data_on_site_images",
+        "field": "Monitoring",
+        "sub_field": "Data type",
+        "modalities": "Yes or No",
+        "explanation": "Use of on-site imagery or handheld soil scanner"
+    },
+    {
         "variable": "Document_Type",
         "field": "Article information",
         "sub_field": "Article",
         "modalities": "Editorial or Primary_Article or Review",
         "explanation": "We indicate the type of article i.e. if it is a review, a primary article or an editorial"
+    },
+    {
+        "variable": "Driver_Afforestation_Reforestation",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve planting trees (afforestation or reforestation)"
+    },
+    {
+        "variable": "Driver_Agricultural_practices",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve agricultural practices (crop rotation, cover crops, tillage)"
+    },
+    {
+        "variable": "Driver_Biochar",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve biochar application to the soil"
+    },
+    {
+        "variable": "Driver_Conservation",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve conservation of biodiversity or habitats"
+    },
+    {
+        "variable": "Driver_Deforestation",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes focus on deforestation mitigation/control"
+    },
+    {
+        "variable": "Driver_Fire_management",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve fire control and prevention"
+    },
+    {
+        "variable": "Driver_Forest_management",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve forest conservation or logging management"
+    },
+    {
+        "variable": "Driver_Grazing",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve grazing or pasture management"
+    },
+    {
+        "variable": "Driver_Irrigation",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve irrigation management"
+    },
+    {
+        "variable": "Driver_Land_conversion",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve land use conversion"
+    },
+    {
+        "variable": "Driver_Restoration",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes focus on ecological restoration of natural spaces"
+    },
+    {
+        "variable": "Driver_Rewetting",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve rewetting of organic soils/peatlands"
+    },
+    {
+        "variable": "Driver_Weathering",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Yes or No",
+        "explanation": "Applied when management changes involve enhanced rock weathering"
+    },
+    {
+        "variable": "First_Author",
+        "field": "Article information",
+        "sub_field": "Article",
+        "modalities": "Last-name of the first author",
+        "explanation": "First author of the article"
+    },
+    {
+        "variable": "Format_Document",
+        "field": "Reporting",
+        "sub_field": "Format",
+        "modalities": "Yes or No",
+        "explanation": "Whether the results are reported in a standard document report"
+    },
+    {
+        "variable": "Format_Online",
+        "field": "Reporting",
+        "sub_field": "Format",
+        "modalities": "Yes or No",
+        "explanation": "Whether the results are reported via an online platform or database"
+    },
+    {
+        "variable": "ID_MRV",
+        "field": "ID MRV example",
+        "sub_field": "Scope",
+        "modalities": "MRVX with X a number.",
+        "explanation": "ID that we attribute to the MRV example to identify it"
+    },
+    {
+        "variable": "ID_article",
+        "field": "Article information",
+        "sub_field": "Article",
+        "modalities": "AX with X the article number",
+        "explanation": "Number ID of the article"
+    },
+    {
+        "variable": "Implementation",
+        "field": "Additional information",
+        "sub_field": "Data Sharing",
+        "modalities": "Project or Implemented",
+        "explanation": "Please indicate if the MRV example was already implemented (Implemented) or if it is in development (Project)"
+    },
+    {
+        "variable": "In_Scope",
+        "field": "Screening for article inclusion",
+        "sub_field": "Scope",
+        "modalities": "Yes or No",
+        "explanation": "The article is in the scope if Yes was answered to Inclusion_criteria_About_MRV and Inclusion_criteria_About_Soil"
+    },
+    {
+        "variable": "Inclusion_criteria_About_MRV",
+        "field": "Screening for article inclusion",
+        "sub_field": "Inclusion criteria MRV",
+        "modalities": "Yes or No",
+        "explanation": "If Yes is answered to the three variables Inclusion_criteria_Monitoring, Inclusion_criteria_Reporting and Inclusion_criteria_Verification"
+    },
+    {
+        "variable": "Inclusion_criteria_About_Soil",
+        "field": "Screening for article inclusion",
+        "sub_field": "Soil",
+        "modalities": "Yes or No",
+        "explanation": "If the article is about soil characteristics or not"
     },
     {
         "variable": "Inclusion_criteria_Monitoring",
@@ -84,41 +287,6 @@
         "explanation": "If the article is giving at least one of the required information about Verification"
     },
     {
-        "variable": "Inclusion_criteria_About_MRV",
-        "field": "Screening for article inclusion",
-        "sub_field": "Inclusion criteria MRV",
-        "modalities": "Yes or No",
-        "explanation": "If Yes is answered to the three variables Inclusion_criteria_Monitoring, Inclusion_criteria_Reporting and Inclusion_criteria_Verification"
-    },
-    {
-        "variable": "Inclusion_criteria_About_Soil",
-        "field": "Screening for article inclusion",
-        "sub_field": "Soil",
-        "modalities": "Yes or No",
-        "explanation": "If the article is about soil characteristics or not"
-    },
-    {
-        "variable": "In_Scope",
-        "field": "Screening for article inclusion",
-        "sub_field": "Scope",
-        "modalities": "Yes or No",
-        "explanation": "The article is in the scope if Yes was answered to Inclusion_criteria_About_MRV and Inclusion_criteria_About_Soil"
-    },
-    {
-        "variable": "ID_MRV",
-        "field": "ID MRV example",
-        "sub_field": "Scope",
-        "modalities": "MRVX with X a number.",
-        "explanation": "ID that we attribute to the MRV example to identify it"
-    },
-    {
-        "variable": "MRV_Name",
-        "field": "ID MRV example",
-        "sub_field": "Scope",
-        "modalities": "The name of the MRV",
-        "explanation": "If the MRV has already a name."
-    },
-    {
         "variable": "Land_use_Agriculture",
         "field": "Stakeholders",
         "sub_field": "Land use",
@@ -126,14 +294,14 @@
         "explanation": "We determine if the MRV framework is applied for this landuse"
     },
     {
-        "variable": "Land_use_Forest",
+        "variable": "Land_use_Degraded_land",
         "field": "Stakeholders",
         "sub_field": "Land use",
-        "modalities": "",
-        "explanation": ""
+        "modalities": "Yes or No",
+        "explanation": "We determine if the MRV framework is applied to degraded, mining, or contaminated lands"
     },
     {
-        "variable": "Land_use_Urban",
+        "variable": "Land_use_Forest",
         "field": "Stakeholders",
         "sub_field": "Land use",
         "modalities": "",
@@ -154,60 +322,67 @@
         "explanation": "If you previously indicate  Yes to Land_use_Others, please write the type of landuse here"
     },
     {
-        "variable": "Scale_Local",
+        "variable": "Land_use_Peatland_Wetland",
         "field": "Stakeholders",
-        "sub_field": "Scale",
+        "sub_field": "Land use",
         "modalities": "Yes or No",
-        "explanation": "We determine if the MRV framework is applied at this scale."
+        "explanation": "We determine if the MRV framework is applied to peatlands or wetlands"
     },
     {
-        "variable": "Scale_Regional",
+        "variable": "Land_use_Urban",
         "field": "Stakeholders",
-        "sub_field": "Scale",
+        "sub_field": "Land use",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Scale_National",
-        "field": "Stakeholders",
-        "sub_field": "Scale",
+        "variable": "MRV_Name",
+        "field": "ID MRV example",
+        "sub_field": "Scope",
+        "modalities": "The name of the MRV",
+        "explanation": "If the MRV has already a name."
+    },
+    {
+        "variable": "Methodology_Other",
+        "field": "Monitoring",
+        "sub_field": "Sampling design",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Scale_Continental",
+        "variable": "Methodology_Standard",
+        "field": "Monitoring",
+        "sub_field": "Sampling design",
+        "modalities": "Yes or No",
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate if a methodology standard is required and/or if other methodologies are employed. You could answer Yes to the two columns."
+    },
+    {
+        "variable": "Monitoring_frequency",
+        "field": "Monitoring",
+        "sub_field": "Sampling design",
+        "modalities": "Less_5_years or 5_10_years or 10_15_years or More_15_years",
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate time range between two soil monitoring required for the MRV."
+    },
+    {
+        "variable": "Occupation_Agroindustry",
         "field": "Stakeholders",
-        "sub_field": "Scale",
+        "sub_field": "Occupation",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Scale_Global",
+        "variable": "Occupation_Consultancy",
         "field": "Stakeholders",
-        "sub_field": "Scale",
+        "sub_field": "Occupation",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Purpose",
+        "variable": "Occupation_Educational_Institutions_Research",
         "field": "Stakeholders",
-        "sub_field": "Purpose and driver",
-        "modalities": "Certification or Compliance_carbon_market or Voluntary_carbon_market or Other",
-        "explanation": "The reason why this MRV is needed. A voluntary carbon market is a carbon market in which members are not legally compelled to reduce their emissions but do so voluntarily. These markets enable carbon emitters to offset their emissions by acquiring carbon credits generated by third-party initiatives aimed at removing or decreasing GHG emissions from the environment.  Companies can engage in the voluntary carbon market on their own or as part of an industry-wide programme. Compliance carbon markets are  also known as mandatory markets. They are governed by national, regional, or provincial law and compel emission sources to meet legally mandated GHG emissions reduction targets. Because compliance  programmes offset credits are generated and traded for regulatory compliance they typically act like, and are priced \nlike, other commodities. Certification is a procedure to attribute a label."
-    },
-    {
-        "variable": "Purpose_Others_Precision",
-        "field": "Stakeholders",
-        "sub_field": "Purpose and driver",
-        "modalities": "Please write it with a capital letter and a _ between words",
-        "explanation": "If you indicate in the column Purpose, Other, please precise the purpose here"
-    },
-    {
-        "variable": "Driver",
-        "field": "Stakeholders",
-        "sub_field": "Purpose and driver",
-        "modalities": "Please write it with a capital letter and a _ between words",
-        "explanation": "The driver that we want to highlight the effect on soil characteristics. It is mainly management practices."
+        "sub_field": "Occupation",
+        "modalities": "",
+        "explanation": ""
     },
     {
         "variable": "Occupation_Farmers",
@@ -224,14 +399,7 @@
         "explanation": ""
     },
     {
-        "variable": "Occupation_Public_Administrators",
-        "field": "Stakeholders",
-        "sub_field": "Occupation",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Occupation_Educational_Institutions_Research",
+        "variable": "Occupation_Forestry_Companies",
         "field": "Stakeholders",
         "sub_field": "Occupation",
         "modalities": "",
@@ -245,25 +413,11 @@
         "explanation": ""
     },
     {
-        "variable": "Occupation_Agroindustry",
+        "variable": "Occupation_Other_companies",
         "field": "Stakeholders",
         "sub_field": "Occupation",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Occupation_Forestry_Companies",
-        "field": "Stakeholders",
-        "sub_field": "Occupation",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Occupation_Consultancy",
-        "field": "Stakeholders",
-        "sub_field": "Occupation",
-        "modalities": "",
-        "explanation": ""
+        "modalities": "Yes or No",
+        "explanation": "Applied when the stakeholder targeted is another type of commercial company"
     },
     {
         "variable": "Occupation_Others",
@@ -280,56 +434,28 @@
         "explanation": "Please indicate if another occupation is mentioned."
     },
     {
-        "variable": "Cost_MRV",
+        "variable": "Occupation_Project_developer",
         "field": "Stakeholders",
-        "sub_field": "Cost",
-        "modalities": "Please write it in number",
-        "explanation": "Please indicate the cost of the MRV"
-    },
-    {
-        "variable": "Cost_Unit",
-        "field": "Stakeholders",
-        "sub_field": "Cost",
-        "modalities": "Please write it with a capital letter and a _ between words",
-        "explanation": "Please indicate the unit i.e. the currency, the spatial area etc."
-    },
-    {
-        "variable": "Parameter_Soil_Microorganisms",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
+        "sub_field": "Occupation",
         "modalities": "Yes or No",
-        "explanation": "We determine if this type of soil parameters is includedin the MRV framework."
+        "explanation": "Applied when the stakeholder targeted is a carbon project developer"
     },
     {
-        "variable": "Parameter_Soil_Fauna",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
+        "variable": "Occupation_Public_Administrators",
+        "field": "Stakeholders",
+        "sub_field": "Occupation",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Parameter_Soil_pH",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
+        "variable": "Occupation_Software_developers",
+        "field": "Stakeholders",
+        "sub_field": "Occupation",
+        "modalities": "Yes or No",
+        "explanation": "Applied when the stakeholder targeted is a software developer or technology provider"
     },
     {
-        "variable": "Parameter_Oxygen_content",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Clay_mineralogy",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Soil_organic_matter_SOC",
+        "variable": "Parameter_Aggregate_stability",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
         "modalities": "",
@@ -343,70 +469,42 @@
         "explanation": ""
     },
     {
-        "variable": "Parameter_Soil_moisture",
+        "variable": "Parameter_CaCO3",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "Measurement of calcium carbonate (CaCO3) content in the soil"
+    },
+    {
+        "variable": "Parameter_Clay_mineralogy",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Parameter_Soil_temperature",
+        "variable": "Parameter_Electrical_conductivity",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
+        "modalities": "Yes or No",
+        "explanation": "Measurement of soil electrical conductivity (salinity)"
     },
     {
-        "variable": "Parameter_Particle_size_distribution",
+        "variable": "Parameter_GHG",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
+        "modalities": "Yes or No",
+        "explanation": "Quantitative assessment of greenhouse gases emissions or fluxes associated with soil processes"
     },
     {
-        "variable": "Parameter_Soil_porosity",
+        "variable": "Parameter_Infiltration_rate",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Soil_diffusivity",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Aggregate_stability",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Soil_compaction",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
+        "modalities": "Yes or No",
+        "explanation": "Measurement of water infiltration rate into the soil"
     },
     {
         "variable": "Parameter_Nutrient_availability",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Pollutant_concentration",
-        "field": "Monitoring",
-        "sub_field": "Soil parameters",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Parameter_Soil_depth",
         "field": "Monitoring",
         "sub_field": "Soil parameters",
         "modalities": "",
@@ -427,88 +525,235 @@
         "explanation": "If you indicate Yes in the column Parameter_Others, please precise the parameter here"
     },
     {
-        "variable": "Data_Land_Management",
+        "variable": "Parameter_Oxygen_content",
         "field": "Monitoring",
-        "sub_field": "Data type",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Particle_size_distribution_Texture",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": "Particle size distribution and texture of the soil"
+    },
+    {
+        "variable": "Parameter_Peat_depth",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
         "modalities": "Yes or No",
-        "explanation": "Please indicate if this data type is used."
+        "explanation": "Measurement of peat thickness and organic layer depth"
     },
     {
-        "variable": "Data_Spatial_images",
+        "variable": "Parameter_Pollutant_concentration",
         "field": "Monitoring",
-        "sub_field": "Data type",
+        "sub_field": "Soil parameters",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Data_Soil_samples",
+        "variable": "Parameter_Soil_Fauna",
         "field": "Monitoring",
-        "sub_field": "Data type",
+        "sub_field": "Soil parameters",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Data_Modelling",
+        "variable": "Parameter_Soil_Microorganisms",
         "field": "Monitoring",
-        "sub_field": "Data type",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "We determine if this type of soil parameters is includedin the MRV framework."
+    },
+    {
+        "variable": "Parameter_Soil_color",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "Observation or measurement of soil color indicators"
+    },
+    {
+        "variable": "Parameter_Soil_compaction_Bulk_density",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": "Soil compaction and bulk density"
+    },
+    {
+        "variable": "Parameter_Soil_depth",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
         "modalities": "",
         "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_diffusivity",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_moisture",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_organic_matter_SOC",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_pH",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_porosity",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_temperature",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Parameter_Soil_type",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "Classification and typing of soil series"
+    },
+    {
+        "variable": "Parameter_Subsidence",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "Measurement of peat subsidence or soil surface level changes"
+    },
+    {
+        "variable": "Parameter_Water_holding_capacity",
+        "field": "Monitoring",
+        "sub_field": "Soil parameters",
+        "modalities": "Yes or No",
+        "explanation": "Measurement of soil water retention and holding capacity"
+    },
+    {
+        "variable": "Person_1",
+        "field": "Article information",
+        "sub_field": "Person",
+        "modalities": "The first-name of the person",
+        "explanation": "First person in charge of the data extraction and verification"
+    },
+    {
+        "variable": "Person_2",
+        "field": "Article information",
+        "sub_field": "Person",
+        "modalities": "The first-name of the person",
+        "explanation": "Second person in charge of the data extraction and verification"
     },
     {
         "variable": "Plot_Area",
         "field": "Monitoring",
         "sub_field": "Sampling design",
         "modalities": "Please write it in number",
-        "explanation": "Please indicate the plot area considered for the data collection."
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate the plot area considered for the data collection."
     },
     {
         "variable": "Plot_Area_Unit",
         "field": "Monitoring",
         "sub_field": "Sampling design",
         "modalities": "Please write it with a capital letter and a _ between words",
-        "explanation": "Please indicate the spatial unit i.e. hectares, km2 etc"
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate the spatial unit i.e. hectares, km2 etc"
     },
     {
-        "variable": "Monitoring_frequency",
-        "field": "Monitoring",
-        "sub_field": "Sampling design",
-        "modalities": "Less_5_years or 5_10_years or 10_15_years or More_15_years",
-        "explanation": "Please indicate time range between two soil monitoring required for the MRV."
+        "variable": "Purpose",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Certification or Compliance_carbon_market or Voluntary_carbon_market or Other",
+        "explanation": "The reason why this MRV is needed. A voluntary carbon market is a carbon market in which members are not legally compelled to reduce their emissions but do so voluntarily. These markets enable carbon emitters to offset their emissions by acquiring carbon credits generated by third-party initiatives aimed at removing or decreasing GHG emissions from the environment.  Companies can engage in the voluntary carbon market on their own or as part of an industry-wide programme. Compliance carbon markets are  also known as mandatory markets. They are governed by national, regional, or provincial law and compel emission sources to meet legally mandated GHG emissions reduction targets. Because compliance  programmes offset credits are generated and traded for regulatory compliance they typically act like, and are priced \nlike, other commodities. Certification is a procedure to attribute a label."
     },
     {
-        "variable": "Methodology_Standard",
-        "field": "Monitoring",
-        "sub_field": "Sampling design",
+        "variable": "Purpose_Others_Precision",
+        "field": "Stakeholders",
+        "sub_field": "Purpose and driver",
+        "modalities": "Please write it with a capital letter and a _ between words",
+        "explanation": "If you indicate in the column Purpose, Other, please precise the purpose here"
+    },
+    {
+        "variable": "Result_based",
+        "field": "Verification",
+        "sub_field": "Verification scheme",
         "modalities": "Yes or No",
-        "explanation": "Please indicate if a methodology standard is required and/or if other methodologies are employed. You could answer Yes to the two columns."
+        "explanation": "Validation conditional on measured soil outcomes (result-based)"
     },
     {
-        "variable": "Methodology_Other",
-        "field": "Monitoring",
-        "sub_field": "Sampling design",
+        "variable": "Scale_Continental",
+        "field": "Stakeholders",
+        "sub_field": "Scale",
+        "modalities": "Yes or No",
+        "explanation": "We determine if the MRV framework is applied at a continental scale"
+    },
+    {
+        "variable": "Scale_Global",
+        "field": "Stakeholders",
+        "sub_field": "Scale",
         "modalities": "",
         "explanation": ""
     },
     {
-        "variable": "Format_Report",
-        "field": "Reporting",
-        "sub_field": "Format",
+        "variable": "Scale_Local",
+        "field": "Stakeholders",
+        "sub_field": "Scale",
         "modalities": "Yes or No",
-        "explanation": "Please indicate if the final product is a report or/and if the the information about the MRV implementation has to be filled online"
+        "explanation": "We determine if the MRV framework is applied at this scale."
     },
     {
-        "variable": "Format_Online",
-        "field": "Reporting",
-        "sub_field": "Format",
+        "variable": "Scale_National",
+        "field": "Stakeholders",
+        "sub_field": "Scale",
         "modalities": "",
         "explanation": ""
+    },
+    {
+        "variable": "Scale_Regional",
+        "field": "Stakeholders",
+        "sub_field": "Scale",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Threshold",
+        "field": "Reporting",
+        "sub_field": "Threshold",
+        "modalities": "Fixed or Reference or Distribution or Relative_Change",
+        "explanation": "[EXCLUDED - >30% missing data] Please indicate the method used to compute the threshold values. \nA Fixed value is a static value based on best available research or knowledge, stratified as required. It comes from the bilbiography. A Reference value is also a static value, calculated as a percentage of what would be found in a reference situation, where soil processes are occurring in a way that is considered to be desirable such as natural areas, stratified as required. A Distribution is a changeable value, based on the regional state of the soil (i.e., threshold defined as a certain percentile of the current observed range of values), static only until distribution is re- measured, after which the threshold may change. A threshold based on relative change is a changeable value, based on the local state of the soil (i.e., target defined as an increase or decrease of a certain percent within a specified number of years for a same place), static only for stated time span, after which the soil is re-measured, and the target will change."
+    },
+    {
+        "variable": "Title",
+        "field": "Article information",
+        "sub_field": "Article",
+        "modalities": "Article title",
+        "explanation": "Article title"
     },
     {
         "variable": "Uncertainty",
         "field": "Reporting",
         "sub_field": "Uncertainty",
         "modalities": "Probabilistic_methods or Sensitivity_analysis or Quantile_distribution\nor Other",
-        "explanation": "The statistical methodology used in the reporting part, to compute the uncertainty of the results. Probalistic methods corresponds to Markov Chain Monte Carlo (MCMC) and Bayesian Inference. An algorithm is used to assess the uncertainty. With the sensitivity analysis, the effect of the explanatory variables (i.e. those that explain the changes in soil parameters) on the uncertainty of the results. For Quantile distribution, 5% and 95% quantile are represented and/or take into account in the result interpretation."
+        "explanation": "[EXCLUDED - >30% missing data] The statistical methodology used in the reporting part, to compute the uncertainty of the results. Probalistic methods corresponds to Markov Chain Monte Carlo (MCMC) and Bayesian Inference. An algorithm is used to assess the uncertainty. With the sensitivity analysis, the effect of the explanatory variables (i.e. those that explain the changes in soil parameters) on the uncertainty of the results. For Quantile distribution, 5% and 95% quantile are represented and/or take into account in the result interpretation."
     },
     {
         "variable": "Uncertainty_Other_Precision",
@@ -516,48 +761,6 @@
         "sub_field": "Uncertainty",
         "modalities": "Please write it with a capital letter and a _ between words",
         "explanation": "-"
-    },
-    {
-        "variable": "Threshold",
-        "field": "Reporting",
-        "sub_field": "Threshold",
-        "modalities": "Fixed or Reference or Distribution or Relative_Change",
-        "explanation": "Please indicate the method used to compute the threshold values. \nA Fixed value is a static value based on best available research or knowledge, stratified as required. It comes from the bilbiography. A Reference value is also a static value, calculated as a percentage of what would be found in a reference situation, where soil processes are occurring in a way that is considered to be desirable such as natural areas, stratified as required. A Distribution is a changeable value, based on the regional state of the soil (i.e., threshold defined as a certain percentile of the current observed range of values), static only until distribution is re- measured, after which the threshold may change. A threshold based on relative change is a changeable value, based on the local state of the soil (i.e., target defined as an increase or decrease of a certain percent within a specified number of years for a same place), static only for stated time span, after which the soil is re-measured, and the target will change."
-    },
-    {
-        "variable": "Verification_Action_based",
-        "field": "Verification",
-        "sub_field": "Verification scheme",
-        "modalities": "Yes or No",
-        "explanation": "Please indicate the method used to verify the results. \nThe Action-based scheme is a scheme where the MRV framework is validated when the MRV user implements  defined measures (e.g. agricultural practices), independently of the resulting impact (e.g. carbon storage) of those measures.\nThe Result-based scheme is a scheme where he MRV framework is validated when the soil parameter value is improved (e.g. increase of the Carbon stock), without taking into account the way to reach this objective. \nHybrid involves both an Action-based scheme and a Result-based scheme."
-    },
-    {
-        "variable": "Verification_Result_based",
-        "field": "Verification",
-        "sub_field": "Verification scheme",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Verification_Methodology_satellite_data",
-        "field": "Verification",
-        "sub_field": "Methodology",
-        "modalities": "Yes or No",
-        "explanation": "Please indicate if this data type is used for the verification part. Several data types can be used."
-    },
-    {
-        "variable": "Verification_Methodology_phone_application",
-        "field": "Verification",
-        "sub_field": "Methodology",
-        "modalities": "",
-        "explanation": ""
-    },
-    {
-        "variable": "Verification_Methodology_field_inspection",
-        "field": "Verification",
-        "sub_field": "Methodology",
-        "modalities": "",
-        "explanation": ""
     },
     {
         "variable": "Verification_Automatization",
@@ -574,45 +777,31 @@
         "explanation": ""
     },
     {
-        "variable": "Auditor",
+        "variable": "Verification_Methodology_field_inspection",
         "field": "Verification",
-        "sub_field": "Auditor",
-        "modalities": "Internal or External",
-        "explanation": "Please indicate if the auditor is an external organization or if the audit is done internally"
+        "sub_field": "Methodology",
+        "modalities": "",
+        "explanation": ""
     },
     {
-        "variable": "Data_Sharing",
+        "variable": "Verification_Methodology_phone_application",
         "field": "Verification",
-        "sub_field": "Data Sharing",
+        "sub_field": "Methodology",
+        "modalities": "",
+        "explanation": ""
+    },
+    {
+        "variable": "Verification_Methodology_satellite_data",
+        "field": "Verification",
+        "sub_field": "Methodology",
         "modalities": "Yes or No",
-        "explanation": "Please indicate if the data could be shared (open-access or on demand) or if it is confidential."
+        "explanation": "Please indicate if this data type is used for the verification part. Several data types can be used."
     },
     {
-        "variable": "Implementation",
-        "field": "Additional information",
-        "sub_field": "Data Sharing",
-        "modalities": "Project or Implemented",
-        "explanation": "Please indicate if the MRV example was already implemented (Implemented) or if it is in development (Project)"
-    },
-    {
-        "variable": "Country",
-        "field": "Additional information",
-        "sub_field": "Data Sharing",
-        "modalities": "Please write the name of the country with a capital letter and _ between words. If several countries are involved, please seperate them with _",
-        "explanation": "The country were the MRV is implemented or at least tested with it is still in development."
-    },
-    {
-        "variable": "Continent",
-        "field": "Additional information",
-        "sub_field": "Data Sharing",
-        "modalities": "Please write the name of the continent with a capital letter and _ between words. If several continent are involved, please seperate them with _",
-        "explanation": "The continent were the MRV is implemented or at least tested with it is still in development."
-    },
-    {
-        "variable": "Comments",
-        "field": "Additional information",
-        "sub_field": "Data Sharing",
-        "modalities": "Please add here any comments you would like to share",
-        "explanation": "-"
+        "variable": "Year",
+        "field": "Article information",
+        "sub_field": "Article",
+        "modalities": "Publication year of the article",
+        "explanation": "Publication year of the article"
     }
 ]
