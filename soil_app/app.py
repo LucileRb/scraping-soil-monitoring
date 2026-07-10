@@ -442,7 +442,8 @@ def render_mrv_details(mrv_data, is_fr=True):
         with col_left:
             st.markdown(f"<div class='section-header'>{t('Reporting & Incertitude', 'Reporting & Uncertainty')}</div>", unsafe_allow_html=True)
             st.write(f"**{t('Format du rapport :', 'Report format:')}** Document: {translate_val(mrv_data.get('Format_Document', 'No'), is_fr)} | Online: {translate_val(mrv_data.get('Format_Online', 'No'), is_fr)}")
-            st.write(f"**{t('Méthode de calcul d\'incertitude :', 'Uncertainty calculation method:')}** {translate_val(mrv_data['Uncertainty'], is_fr)}")
+            label_fr = "Méthode de calcul d'incertitude :"
+            st.write(f"**{t(label_fr, 'Uncertainty calculation method:')}** {translate_val(mrv_data['Uncertainty'], is_fr)}")
             st.write(f"**{t('Méthode de calcul du seuil :', 'Threshold calculation method:')}** {translate_val(mrv_data['Threshold'], is_fr).replace('Fixed', 'Fixe').replace('Relative_Change', 'Changement Relatif')}")
             
         with col_right:
