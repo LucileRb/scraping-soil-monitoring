@@ -1226,7 +1226,8 @@ if mode_clean == 'Home':
 
 # ----------------- DECISION TOOL PAGE -----------------
 elif mode_clean == 'Decision Tool':
-    st.markdown(f"<h1>{t('Outil d\'Aide à la Décision MRV', 'MRV Decision Support Tool')}</h1>", unsafe_allow_html=True)
+    label_fr = "Outil d'Aide à la Décision MRV"
+    st.markdown(f"<h1>{t(label_fr, 'MRV Decision Support Tool')}</h1>", unsafe_allow_html=True)
     st.markdown(t("Utilisez les filtres de la barre latérale pour trouver les cadres MRV qui correspondent à vos besoins.", "Use the sidebar filters to find MRV frameworks that match your needs."))
     
     # Sidebar Filters construction
