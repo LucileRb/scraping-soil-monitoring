@@ -378,7 +378,8 @@ def render_mrv_details(mrv_data, is_fr=True):
         with col_right:
             st.markdown(f"<div class='section-header'>{t('Objectifs & Leviers', 'Objectives & Drivers')}</div>", unsafe_allow_html=True)
             st.write(f"**{t('Objectif de marché :', 'Market purpose:')}** {translate_val(mrv_data['Purpose'], is_fr).replace('Voluntary_carbon_market', 'Marché du carbone volontaire').replace('Compliance_carbon_market', 'Marché du carbone réglementaire')}")
-            st.write(f"**{t('Statut d\'implémentation :', 'Implementation status:')}** {translate_val(mrv_data['Implementation'], is_fr)}")
+            label_fr = "Statut d'implémentation :"
+            st.write(f"**{t(label_fr, 'Implementation status:')}** {translate_val(mrv_data['Implementation'], is_fr)}")
             
             # Find active drivers
             active_drivers = []
