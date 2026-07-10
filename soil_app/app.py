@@ -1050,7 +1050,7 @@ def t(fr, en):
 app_mode = st.sidebar.selectbox(t('Menu de Navigation', 'Navigation Menu'), [
     t('🏠 Accueil', '🏠 Home'),
     t('🔎 Outil de Décision', '🔎 Decision Tool'),
-    t('🗂️ Pokedex', '🗂️ Pokedex'),
+    t('🗂️ MRV Card', '🗂️ MRV Card'),
     t('📚 Bibliographie', '📚 Articles'),
     t('📊 Guide MRV', '📊 MRV Guide')
 ])
@@ -1532,8 +1532,8 @@ elif mode_clean == 'Decision Tool':
             render_mrv_details(mrv_data, is_fr=is_fr)
 
 # ----------------- POKEDEX (MRV EXPLORER) PAGE -----------------
-elif mode_clean == 'Pokedex':
-    st.markdown(f"<h1>{t('Explorateur de Cadres (Pokedex MRV)', 'Framework Explorer (MRV Pokedex)')}</h1>", unsafe_allow_html=True)
+elif mode_clean == 'MRV Card':
+    st.markdown(f"<h1>{t('Framework Explorer (MRV Card)', 'Framework Explorer (MRV Card)')}</h1>", unsafe_allow_html=True)
     st.markdown(t("Visualisez et explorez l'ensemble des 96 cadres MRV de notre base de données.", "View and explore all 96 MRV frameworks in our database."))
     st.divider()
     
