@@ -358,7 +358,7 @@ def generate_modal_html(mrv_data, card_html):
     pub_link = mrv_data.get('Pub_Link', '#')
     country = mrv_data.get('Country', 'Global')
     continent = mrv_data.get('Continent', 'N/A')
-    purpose = mrv_data.get('Purpose', 'Not specified')
+    purpose = mrv_data.get('Purpose', 'Not specified').replace('_', ' ')
     
     # Active land uses
     lu_list = []
