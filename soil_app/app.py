@@ -192,53 +192,54 @@ def generate_pokemon_card_html(mrv_data, match_score=100):
         f'<div class="card-mrv-monitoring">'
         f'<div class="block-title">Monitoring</div>'
         f'<div class="block-text">'
-        f'<b>Parameters:</b> {params_str}<br>'
-        f'<b>Data:</b> {data_str}<br>'
-        f'<b>Frequency:</b> {mrv_data.get("Monitoring_frequency", "N/A")}<br>'
-        f'<b>Standards use:</b> {mrv_data.get("Methodology_Standard", "N/A")}'
+        f'Parameters : {params_str}<br>'
+        f'Data : {data_str}<br>'
+        f'Frequency : {mrv_data.get("Monitoring_frequency", "N/A")}<br>'
+        f'Standards use : {mrv_data.get("Methodology_Standard", "N/A")}'
         f'</div>'
         f'</div>'
         f'<div class="card-mrv-rep-ver">'
         f'<div class="card-mrv-reporting">'
         f'<div class="block-title">Reporting</div>'
         f'<div class="block-text">'
-        f'<b>Format:</b> {formats_str}<br>'
-        f'<b>Uncertainty:</b> {mrv_data.get("Uncertainty", "N/A")}<br>'
-        f'<b>Threshold:</b> {threshold}'
+        f'Format : {formats_str}<br>'
+        f'Uncertainty: {mrv_data.get("Uncertainty", "N/A")}<br>'
+        f'Threshold : {threshold}'
         f'</div>'
         f'</div>'
         f'<div class="card-mrv-verification">'
         f'<div class="block-title">Verification</div>'
         f'<div class="block-text">'
-        f'<b>Scheme:</b> {schemes_str}<br>'
-        f'<b>Methodology:</b> {mrv_data.get("Verification_methodology", "N/A")}<br>'
-        f'<b>Auditor:</b> {auditor}<br>'
-        f'<b>Automatization:</b> {mrv_data.get("Verification_automatization", "N/A")}<br>'
-        f'<b>Open-access:</b> {sharing}'
+        f'Sheme : {schemes_str}<br>'
+        f'Methodology : {mrv_data.get("Verification_methodology", "N/A")}<br>'
+        f'Auditor : {auditor}<br>'
+        f'Automatization : {mrv_data.get("Verification_automatization", "N/A")}<br>'
+        f'Open-access : {sharing}'
+        f'</div>'
         f'</div>'
         f'</div>'
         f'</div>'
         f'<div class="card-impl-bar">'
-        f'Implementation | {country} | {impl}'
+        f'Implementation | <span class="impl-country">{country} |</span>'
         f'</div>'
         f'<div class="card-section-box">'
         f'<div class="section-box-title">Where ?</div>'
         f'<div class="section-box-text">'
-        f'<b>Land use:</b> {land_uses_str}<br>'
-        f'<b>Geographical scale:</b> {scales_str}'
+        f'Land use: {land_uses_str}<br>'
+        f'Geographical scale : {scales_str}'
         f'</div>'
         f'</div>'
         f'<div class="card-section-box">'
         f'<div class="section-box-title">Who ?</div>'
         f'<div class="section-box-text">'
-        f'<b>Occupation:</b> {occupations_str}'
+        f'Occupation : {occupations_str}'
         f'</div>'
         f'</div>'
         f'<div class="card-section-box">'
         f'<div class="section-box-title">Why ?</div>'
         f'<div class="section-box-text">'
-        f'<b>Purpose:</b> {purpose}<br>'
-        f'<b>Actions:</b> {drivers_str}'
+        f'Purpose : {purpose}<br>'
+        f'Actions : {drivers_str}'
         f'</div>'
         f'</div>'
         f'<div class="card-links-box">'
@@ -686,12 +687,25 @@ st.markdown("""
     .card-impl-bar {
         background: #dab254;
         color: #0E1612 !important;
-        font-size: 10px;
+        font-size: 10.5px;
         font-weight: bold;
         text-align: center;
-        padding: 4px;
+        padding: 4px 8px;
         border-radius: 4px;
         margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .impl-country {
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        padding: 1px 6px;
+        border-radius: 3px;
+        display: inline-block;
+        color: #0E1612 !important;
     }
     
     .card-section-box {
