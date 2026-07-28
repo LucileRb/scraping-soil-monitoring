@@ -1040,7 +1040,7 @@ if st.session_state.step == 'page_1':
         
     with col_ann_c:
         # Example card content
-        example_data = {
+        example_data = pd.Series({
             'Source': 'Literature (Scopus)',
             'Land_use_Agriculture': 'Yes',
             'Land_use_Forest': 'Yes',
@@ -1071,7 +1071,7 @@ if st.session_state.step == 'page_1':
             'Pub_Year': '2025',
             'Country': 'Global',
             'Purpose': 'Voluntary carbon market'
-        }
+        })
         card_html = generate_pokemon_card_html(example_data, match_score=100)
         st.markdown(card_html, unsafe_allow_html=True)
         
