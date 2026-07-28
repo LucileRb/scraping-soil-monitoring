@@ -248,28 +248,6 @@ def generate_pokemon_card_html(mrv_data, clickable=False):
         f'</div>'
         f'</div>'
     )
-    if clickable:
-        # Build focus url preserving filters to prevent session state resets on page reloads
-        url_params = [f"focus={mrv_id}"]
-        if st.session_state.get('filter_lu_agri'): url_params.append("lu_agri=1")
-        if st.session_state.get('filter_lu_forest'): url_params.append("lu_forest=1")
-        if st.session_state.get('filter_lu_urban'): url_params.append("lu_urban=1")
-        if st.session_state.get('filter_lu_peat'): url_params.append("lu_peat=1")
-        if st.session_state.get('filter_sc_local'): url_params.append("sc_local=1")
-        if st.session_state.get('filter_sc_regional'): url_params.append("sc_regional=1")
-        if st.session_state.get('filter_sc_national'): url_params.append("sc_national=1")
-        if st.session_state.get('filter_sc_continental'): url_params.append("sc_continental=1")
-        if st.session_state.get('filter_sc_global'): url_params.append("sc_global=1")
-        
-        occ = st.session_state.get('filter_occupation', 'All')
-        if occ != 'All': url_params.append(f"occupation={occ}")
-        purp = st.session_state.get('filter_purpose', 'All')
-        if purp != 'All': url_params.append(f"purpose={purp}")
-        drv = st.session_state.get('filter_driver', 'All')
-        if drv != 'All': url_params.append(f"driver={drv}")
-        
-        focus_url = "?" + "&".join(url_params)
-        html = f'<a href="{focus_url}" target="_self" style="text-decoration: none; color: inherit; display: block;">{html}</a>'
     return html
 
 def render_mrv_details(mrv_data):
@@ -1013,6 +991,32 @@ st.markdown("""
         overflow-y: auto;
         padding-right: 10px;
     }
+    /* Clickable card wrapper with transparent overlay button styling */
+    div[data-testid="stColumn"]:has(.clickable-card-wrapper) {
+        position: relative;
+    }
+    
+    div[data-testid="stColumn"]:has(.clickable-card-wrapper) div.stButton > button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+        border: none !important;
+        color: transparent !important;
+        cursor: pointer;
+        z-index: 10;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Ensure card hovers work when hovering the column container */
+    div[data-testid="stColumn"]:has(.clickable-card-wrapper):hover .mrv-custom-card {
+        transform: translateY(-10px) scale(1.03) rotate(0.5deg);
+        box-shadow: 0 25px 45px rgba(0,0,0,0.8), 0 0 20px rgba(218,178,84,0.3);
+        border-color: #dab254;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1051,32 +1055,7 @@ OCCUPATION_MAP = {
 if 'step' not in st.session_state:
     st.session_state.step = 'page_1'
 
-# Handle query parameters for clickable cards (compatible with older Streamlit versions)
-try:
-    params = st.query_params
-except AttributeError:
-    params = st.experimental_get_query_params()
 
-if "focus" in params:
-    val = params["focus"]
-    mrv_id = val[0] if isinstance(val, list) else val
-    st.session_state.selected_mrv_id = mrv_id
-    st.session_state.step = 'page_4'
-    
-    # Restore filter states from query parameters to prevent reset
-    st.session_state.filter_lu_agri = "lu_agri" in params
-    st.session_state.filter_lu_forest = "lu_forest" in params
-    st.session_state.filter_lu_urban = "lu_urban" in params
-    st.session_state.filter_lu_peat = "lu_peat" in params
-    st.session_state.filter_sc_local = "sc_local" in params
-    st.session_state.filter_sc_regional = "sc_regional" in params
-    st.session_state.filter_sc_national = "sc_national" in params
-    st.session_state.filter_sc_continental = "sc_continental" in params
-    st.session_state.filter_sc_global = "sc_global" in params
-    
-    st.session_state.filter_occupation = params.get("occupation", ["All"])[0] if isinstance(params.get("occupation"), list) else params.get("occupation", "All")
-    st.session_state.filter_purpose = params.get("purpose", ["All"])[0] if isinstance(params.get("purpose"), list) else params.get("purpose", "All")
-    st.session_state.filter_driver = params.get("driver", ["All"])[0] if isinstance(params.get("driver"), list) else params.get("driver", "All")
 
 defaults = {
     'filter_lu_agri': False,
@@ -1204,10 +1183,6 @@ if st.session_state.step == 'page_1':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Let's start", use_container_width=True):
-            try:
-                st.query_params.clear()
-            except AttributeError:
-                st.experimental_set_query_params()
             st.session_state.step = 'page_2'
             st.rerun()
             
@@ -1450,10 +1425,6 @@ elif st.session_state.step == 'page_2':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Get the MRV procedures", use_container_width=True):
-            try:
-                st.query_params.clear()
-            except AttributeError:
-                st.experimental_set_query_params()
             st.session_state.step = 'page_3'
             st.rerun()
 
@@ -1481,12 +1452,8 @@ elif st.session_state.step in ['page_3', 'page_4']:
                     card_html_focused = generate_pokemon_card_html(focused_mrv)
                     st.markdown(card_html_focused, unsafe_allow_html=True)
                     
-                    # Close button below the card
+                    # Close button below the card (simply resets state without browser refreshes)
                     if st.button("Close details ✕", use_container_width=True):
-                        try:
-                            st.query_params.clear()
-                        except AttributeError:
-                            st.experimental_set_query_params()
                         st.session_state.selected_mrv_id = None
                         st.session_state.step = 'page_3'
                         st.rerun()
@@ -1505,8 +1472,8 @@ elif st.session_state.step in ['page_3', 'page_4']:
             col_idx = idx % 3
             with cols[col_idx]:
                 score = mrv_row.get('Match_Score', 100)
-                card_html = generate_pokemon_card_html(mrv_row, clickable=True)
-                st.markdown(card_html, unsafe_allow_html=True)
+                card_html = generate_pokemon_card_html(mrv_row)
+                st.markdown(f'<div class="clickable-card-wrapper">{card_html}</div>', unsafe_allow_html=True)
                 
                 # Render matching score below the card
                 bar_color = "#52B788" if score > 70 else ("#DAB254" if score > 40 else "#EF4444")
@@ -1518,4 +1485,11 @@ elif st.session_state.step in ['page_3', 'page_4']:
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Render transparent Streamlit button overlaying the card area
+                if st.button("", key=f"btn_focus_{mrv_row['ID_MRV']}", use_container_width=True):
+                    st.session_state.selected_mrv_id = mrv_row['ID_MRV']
+                    st.session_state.step = 'page_4'
+                    st.rerun()
+                    
                 st.markdown("<div style='margin-bottom: 75px;'></div>", unsafe_allow_html=True)
