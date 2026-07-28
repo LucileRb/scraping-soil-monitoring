@@ -70,6 +70,8 @@ def get_base64_image(image_path):
         return ""
 
 def calculate_hp(mrv_data):
+    if isinstance(mrv_data, dict):
+        mrv_data = pd.Series(mrv_data)
     yes_count = 0
     for col in mrv_data.index:
         if (col.startswith('Parameter_') or col.startswith('Land_use_') or col.startswith('Scale_') or col.startswith('Data_')) and mrv_data[col] == 'Yes':
@@ -97,6 +99,8 @@ def translate_val(val):
     return mapping.get(str(val), val)
 
 def generate_pokemon_card_html(mrv_data, match_score=100):
+    if isinstance(mrv_data, dict):
+        mrv_data = pd.Series(mrv_data)
     src = mrv_data.get('Source', 'AI Search')
     
     if src == 'Literature (Scopus)':
