@@ -218,7 +218,6 @@ def generate_pokemon_card_html(mrv_data, match_score=100):
         f'</div>'
         f'</div>'
         f'</div>'
-        f'</div>'
         f'<div class="card-impl-bar">'
         f'Implementation | {country} | {impl}'
         f'</div>'
@@ -832,13 +831,7 @@ if LOGO_PATH:
         st.sidebar.image(sidebar_cropped, use_column_width=True)
 st.sidebar.markdown("<div style='text-align: center; font-size: 11px; color: #94A3B8; margin-top: 5px; font-style: italic;'>Photos credits : Camille Imbert</div>", unsafe_allow_html=True)
 
-st.sidebar.markdown("""
-<div style='text-align: center; margin-top: 15px;'>
-    <div style='display: inline-block; padding: 6px 20px; border: 1px solid #ffffff; border-radius: 4px; color: #ffffff; font-weight: bold; font-size: 14px;'>
-        English
-    </div>
-</div>
-""", unsafe_allow_html=True)
+
 
 # Helper function to render filters
 def draw_filter_widgets(in_sidebar=False):
