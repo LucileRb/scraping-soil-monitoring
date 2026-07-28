@@ -101,23 +101,6 @@ def translate_val(val):
 def generate_pokemon_card_html(mrv_data, match_score=100):
     if isinstance(mrv_data, dict):
         mrv_data = pd.Series(mrv_data)
-    src = mrv_data.get('Source', 'AI Search')
-    
-    if src == 'Literature (Scopus)':
-        card_type = 'grass'
-        type_emoji = '🌱'
-        energy_cost_2 = '🌱🌱'
-        energy_cost_3 = '🌱🌱🌱'
-    elif src == 'Webscraping':
-        card_type = 'water'
-        type_emoji = '💧'
-        energy_cost_2 = '💧💧'
-        energy_cost_3 = '💧💧💧'
-    else:
-        card_type = 'psychic'
-        type_emoji = '🔮'
-        energy_cost_2 = '🔮🔮'
-        energy_cost_3 = '🔮🔮🔮'
         
     land_uses = []
     lu_names = [
@@ -144,6 +127,18 @@ def generate_pokemon_card_html(mrv_data, match_score=100):
         if mrv_data.get(col) == 'Yes':
             scales.append(sc_lbl)
     scales_str = ", ".join(scales) if scales else "None"
+    
+    occupations = []
+    for occ_lbl, col in OCCUPATION_MAP.items():
+        if mrv_data.get(col) == 'Yes':
+            occupations.append(occ_lbl)
+    occupations_str = ", ".join(occupations) if occupations else "None"
+    
+    drivers = []
+    for drv_lbl, col in DRIVER_MAP.items():
+        if mrv_data.get(col) == 'Yes':
+            drivers.append(drv_lbl)
+    drivers_str = ", ".join(drivers) if drivers else "None"
     
     params = []
     for col in mrv_data.index:
@@ -185,66 +180,71 @@ def generate_pokemon_card_html(mrv_data, match_score=100):
     year = mrv_data.get('Pub_Year', '2025')
     country = mrv_data.get('Country', 'Global')
     purpose = mrv_data.get('Purpose', 'Not specified')
-    
-    display_name = mrv_name[:24] + '...' if len(mrv_name) > 26 else mrv_name
-    
-    # Progress color based on score
-    bar_color = "#52B788" if match_score > 70 else ("#DAB254" if match_score > 40 else "#EF4444")
+    pub_link = mrv_data.get('Pub_Link', '#')
     
     html = (
-        f'<div class="pokemon-card-wrapper">'
-        f'<div class="pokemon-card card-{card_type}">'
-        f'<div class="pokemon-card-header">'
-        f'<span class="pokemon-card-name">{display_name}</span>'
-        f'<span class="pokemon-card-hp">{mrv_id} {type_emoji}</span>'
+        f'<div class="mrv-custom-card">'
+        f'<div class="card-header-custom">'
+        f'<span class="card-header-id">{mrv_id}</span>'
+        f'<span class="card-header-name">{mrv_name} 🌱</span>'
         f'</div>'
-        f'<div class="pokemon-card-img-container">'
-        f'<div class="pokemon-card-specs-box">'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Land Uses:</span><span class="pokemon-spec-val">{land_uses_str}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Scales:</span><span class="pokemon-spec-val">{scales_str}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Purpose:</span><span class="pokemon-spec-val">{purpose}</span></div>'
-        f'<div class="pokemon-spec-row"><span class="pokemon-spec-label">Status:</span><span class="pokemon-spec-val">{impl}</span></div>'
-        f'</div>'
-        f'<div class="pokemon-card-img-caption">No. {mrv_id} | {country} | Author: {author} ({year})</div>'
-        f'</div>'
-        f'<div class="pokemon-card-body">'
-        f'<div class="pokemon-card-ability">'
-        f'<span class="pokemon-ability-cost">{type_emoji}</span>'
-        f'<span class="pokemon-ability-name">Monitoring Component</span>'
-        f'<div class="pokemon-ability-desc">Params: <b>{params_str}</b><br>Data: <b>{data_str}</b></div>'
-        f'</div>'
-        f'<div class="pokemon-card-ability">'
-        f'<span class="pokemon-ability-cost">{energy_cost_2}</span>'
-        f'<span class="pokemon-ability-name">Reporting Component</span>'
-        f'<div class="pokemon-ability-desc">Format: <b>{formats_str}</b><br>Threshold: <b>{threshold}</b></div>'
-        f'</div>'
-        f'<div class="pokemon-card-ability">'
-        f'<span class="pokemon-ability-cost">{energy_cost_3}</span>'
-        f'<span class="pokemon-ability-name">Verification Component</span>'
-        f'<div class="pokemon-ability-desc">Scheme: <b>{schemes_str}</b><br>Auditor: <b>{auditor}</b></div>'
+        f'<div class="card-mrv-block">'
+        f'<div class="card-mrv-monitoring">'
+        f'<div class="block-title">Monitoring</div>'
+        f'<div class="block-text">'
+        f'<b>Parameters:</b> {params_str}<br>'
+        f'<b>Data:</b> {data_str}<br>'
+        f'<b>Frequency:</b> {mrv_data.get("Monitoring_frequency", "N/A")}<br>'
+        f'<b>Standards use:</b> {mrv_data.get("Methodology_Standard", "N/A")}'
         f'</div>'
         f'</div>'
-        f'<div class="pokemon-card-footer">'
-        f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Status</span>'
-        f'<span class="pokemon-footer-value">{impl}</span>'
-        f'</div>'
-        f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Source</span>'
-        f'<span class="pokemon-footer-value">{src}</span>'
-        f'</div>'
-        f'<div class="pokemon-footer-item">'
-        f'<span class="pokemon-footer-label">Country</span>'
-        f'<span class="pokemon-footer-value">{country}</span>'
+        f'<div class="card-mrv-rep-ver">'
+        f'<div class="card-mrv-reporting">'
+        f'<div class="block-title">Reporting</div>'
+        f'<div class="block-text">'
+        f'<b>Format:</b> {formats_str}<br>'
+        f'<b>Uncertainty:</b> {mrv_data.get("Uncertainty", "N/A")}<br>'
+        f'<b>Threshold:</b> {threshold}'
         f'</div>'
         f'</div>'
-        f'<div class="pokemon-card-flavor">Data Sharing: {sharing}</div>'
-        f'<div style="margin-top: 10px; font-size: 11px; text-align: center; font-weight: bold; color: #ffffff;">'
-        f'Matching Score: {match_score}%'
-        f'<div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">'
-        f'<div style="background-color: {bar_color}; width: {match_score}%; height: 100%;"></div>'
+        f'<div class="card-mrv-verification">'
+        f'<div class="block-title">Verification</div>'
+        f'<div class="block-text">'
+        f'<b>Scheme:</b> {schemes_str}<br>'
+        f'<b>Methodology:</b> {mrv_data.get("Verification_methodology", "N/A")}<br>'
+        f'<b>Auditor:</b> {auditor}<br>'
+        f'<b>Automatization:</b> {mrv_data.get("Verification_automatization", "N/A")}<br>'
+        f'<b>Open-access:</b> {sharing}'
         f'</div>'
         f'</div>'
+        f'</div>'
+        f'</div>'
+        f'<div class="card-impl-bar">'
+        f'Implementation | {country} | {impl}'
+        f'</div>'
+        f'<div class="card-section-box">'
+        f'<div class="section-box-title">Where ?</div>'
+        f'<div class="section-box-text">'
+        f'<b>Land use:</b> {land_uses_str}<br>'
+        f'<b>Geographical scale:</b> {scales_str}'
+        f'</div>'
+        f'</div>'
+        f'<div class="card-section-box">'
+        f'<div class="section-box-title">Who ?</div>'
+        f'<div class="section-box-text">'
+        f'<b>Occupation:</b> {occupations_str}'
+        f'</div>'
+        f'</div>'
+        f'<div class="card-section-box">'
+        f'<div class="section-box-title">Why ?</div>'
+        f'<div class="section-box-text">'
+        f'<b>Purpose:</b> {purpose}<br>'
+        f'<b>Actions:</b> {drivers_str}'
+        f'</div>'
+        f'</div>'
+        f'<div class="card-links-box">'
+        f'<div class="card-link-item"><a href="{pub_link}" target="_blank">SOURCE (with URL link)</a></div>'
+        f'<div class="card-link-item"><a href="{pub_link}" target="_blank">Title of our article (with URL link)</a></div>'
         f'</div>'
         f'</div>'
     )
@@ -657,139 +657,152 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         align-items: center;
-        box-shadow: inset 0 0 12px rgba(0,0,0,0.8);
-        margin-bottom: 8px;
-    }
-    
-    .pokemon-card-img-caption {
-        background: linear-gradient(90deg, #c89d3c, #dab254);
-        color: #0b1612 !important;
-        font-size: 9px;
-        font-weight: 700;
-        width: 100%;
-        text-align: center;
-        padding: 4px 0;
-        border-top: 2px solid #c89d3c;
-        text-shadow: none;
-    }
-    
-    .pokemon-card-body {
-        padding: 2px 0;
-    }
-    
-    .pokemon-card-ability {
-        margin-bottom: 6px;
-        padding: 6px 8px;
-        border-radius: 8px;
-        background: rgba(0,0,0,0.3);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    
-    .pokemon-ability-cost {
-        font-size: 13px;
-        margin-right: 6px;
-        display: inline-block;
-        vertical-align: middle;
-    }
-    
-    .pokemon-ability-name {
-        font-weight: 700;
-        color: #dab254 !important;
-        font-size: 12px;
-        display: inline-block;
-        vertical-align: middle;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    }
-    
-    .pokemon-ability-desc {
-        font-size: 10px;
-        color: #e2e8f0 !important;
-        margin-top: 3px;
-        line-height: 1.35;
-    }
-    
-    .pokemon-card-footer {
-        display: flex;
-        justify-content: space-between;
-        border-top: 1px solid rgba(255, 255, 255, 0.15);
-        padding-top: 6px;
-        margin-top: 6px;
-        font-size: 10px;
-        color: #94a3b8;
-    }
-    
-    .pokemon-footer-item {
-        text-align: center;
-        flex: 1;
-    }
-    
-    .pokemon-footer-label {
-        display: block;
-        font-size: 8px;
-        text-transform: uppercase;
-        color: #64748b;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-    
-    .pokemon-footer-value {
-        font-weight: 700;
-        color: #e2e8f0 !important;
-    }
-    
-    .pokemon-card-flavor {
-        font-style: italic;
-        font-size: 9px;
-        color: #a1a1aa !important;
-        text-align: center;
-        margin-top: 6px;
-        padding: 4px 6px;
-        background: rgba(0, 0, 0, 0.25);
-        border-radius: 4px;
-        border-left: 3px solid #dab254;
-        line-height: 1.3;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    
-    .pokemon-card-specs-box {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        background: rgba(0, 0, 0, 0.4);
-        padding: 10px 12px;
-        height: 160px;
+    .mrv-custom-card {
+        background: #0E1612;
+        border: 4.5px solid #c89d3c;
+        border-radius: 18px;
+        padding: 15px;
         box-sizing: border-box;
         width: 100%;
+        max-width: 360px;
+        margin: 0 auto;
+        font-family: 'Outfit', sans-serif !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     }
     
-    .pokemon-spec-row {
+    .card-header-custom {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 3px;
-        margin-bottom: 3px;
+        margin-bottom: 10px;
+        padding-bottom: 4px;
     }
     
-    .pokemon-spec-row:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-        margin-bottom: 0;
+    .card-header-id {
+        background: #242526;
+        border-radius: 4px;
+        padding: 4px 10px;
+        font-weight: 700;
+        color: #fff !important;
+        font-size: 13px;
     }
     
-    .pokemon-spec-label {
+    .card-header-name {
+        color: #ef4444 !important;
+        font-weight: bold;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .card-mrv-block {
+        border: 2px solid #c89d3c;
+        border-radius: 8px;
+        display: flex;
+        overflow: hidden;
+        margin-bottom: 10px;
+        background: #15221B;
+    }
+    
+    .card-mrv-monitoring {
+        width: 50%;
+        border-right: 2px solid #c89d3c;
+        padding: 8px;
+    }
+    
+    .card-mrv-rep-ver {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-mrv-reporting {
+        border-bottom: 2px solid #c89d3c;
+        padding: 8px;
+        flex: 1;
+    }
+    
+    .card-mrv-verification {
+        padding: 8px;
+        flex: 1.2;
+    }
+    
+    .block-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #fff !important;
+        margin-bottom: 6px;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        padding-bottom: 2px;
+        text-align: center;
+    }
+    
+    .block-text {
+        font-size: 9.5px;
+        line-height: 1.35;
+        color: #E2E8F0 !important;
+    }
+    
+    .block-text b {
+        color: #dab254 !important;
+    }
+    
+    .card-impl-bar {
+        background: #dab254;
+        color: #0E1612 !important;
         font-size: 10px;
-        color: #dab254;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px;
+        border-radius: 4px;
+        margin-bottom: 10px;
     }
     
-    .pokemon-spec-val {
+    .card-section-box {
+        background: #111e16;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .section-box-title {
+        color: #dab254 !important;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+    
+    .section-box-text {
         font-size: 10px;
-        color: #e2e8f0;
+        color: #E2E8F0 !important;
+        line-height: 1.3;
+    }
+    
+    .section-box-text b {
+        color: #64748b !important;
+    }
+    
+    .card-links-box {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .card-link-item {
+        background: #242526;
+        border-radius: 4px;
+        padding: 6px;
+        font-size: 9px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .card-link-item a {
+        color: #dab254 !important;
+        text-decoration: none;
         font-weight: bold;
     }
 
@@ -1048,39 +1061,39 @@ if st.session_state.step == 'page_1':
         st.markdown("""
         <div class="schema-col-left">
             <div class="schema-item">
-                <span class="schema-title">Type of Soil Parameters</span>
+                <span class="schema-title">Type of Soil Parameters ───►</span>
                 <p class="schema-desc">Soil organic carbon, pH, bulk density, etc., measured in-situ or in lab.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Type of Data Used</span>
+                <span class="schema-title">Type of Data Used ───►</span>
                 <p class="schema-desc">Self-reported farming surveys, satellite imagery, physical soil cores, or models.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Time Range / Frequency</span>
+                <span class="schema-title">Time Range / Frequency ───►</span>
                 <p class="schema-desc">Time gap required between two consecutive soil monitoring sessions.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Methodology Standard</span>
+                <span class="schema-title">Methodology Standard ───►</span>
                 <p class="schema-desc">If a recognized methodology standard (ISO, IPCC, Verra) is required.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Where? Land Use</span>
+                <span class="schema-title">Where? Land Use ───►</span>
                 <p class="schema-desc">Cropland, forestry, grasslands, peatlands, or degraded lands.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Geographical Scale</span>
+                <span class="schema-title">Geographical Scale ───►</span>
                 <p class="schema-desc">Application scope: Local, Regional, National, Continental, or Global.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Who? Targeted Stakeholders</span>
+                <span class="schema-title">Who? Targeted Stakeholders ───►</span>
                 <p class="schema-desc">Targeted user role (Farmers, Foresters, NGOs, Project developers, etc.).</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Why? Market Purpose</span>
+                <span class="schema-title">Why? Market Purpose ───►</span>
                 <p class="schema-desc">Target markets like Voluntary Carbon Markets, Compliance, or public incentives.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Actions to Implement</span>
+                <span class="schema-title">Actions to Implement ───►</span>
                 <p class="schema-desc">Specific soil practices targeting carbon accumulation or restoration.</p>
             </div>
         </div>
@@ -1120,54 +1133,64 @@ if st.session_state.step == 'page_1':
             'Country': 'Global',
             'Purpose': 'Voluntary carbon market'
         })
-        card_html = generate_pokemon_card_html(example_data, match_score=100)
+        card_html = generate_pokemon_card_html(example_data)
         st.markdown(card_html, unsafe_allow_html=True)
+        
+        # Matching score bar below the card
+        st.markdown("""
+        <div style="font-size: 11px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 15px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
+            Matching Score: 100%
+            <div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">
+                <div style="background-color: #52B788; width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
     with col_layout_r:
         st.markdown("""
         <div class="schema-col-right">
             <div class="schema-item">
-                <span class="schema-title">Final Product / Format</span>
+                <span class="schema-title">◄─── Final Product / Format</span>
                 <p class="schema-desc">Reporting output format: Document reports (PDF, Word) or Online dashboards.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Uncertainty Computation</span>
+                <span class="schema-title">◄─── Uncertainty Computation</span>
                 <p class="schema-desc">Statistical methods used to measure and adjust for results uncertainty.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Threshold Values</span>
+                <span class="schema-title">◄─── Threshold Values</span>
                 <p class="schema-desc">Baseline/threshold methodology (Fixed vs Relative change).</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Verification Scheme</span>
+                <span class="schema-title">◄─── Verification Scheme</span>
                 <p class="schema-desc">Whether validation is based on actions performed or measured results.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Verification Auditor</span>
+                <span class="schema-title">◄─── Verification Auditor</span>
                 <p class="schema-desc">Validation entity: Internal project auditor or Independent third-party.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Automatization</span>
+                <span class="schema-title">◄─── Automatization</span>
                 <p class="schema-desc">If reporting and verification are handled manually or automated.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Open Access Data</span>
+                <span class="schema-title">◄─── Open Access Data</span>
                 <p class="schema-desc">If final project data is shared publicly or remains private/internal.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Implementation Status</span>
+                <span class="schema-title">◄─── Implementation Status</span>
                 <p class="schema-desc">Geographic coverage and status (Implemented project or theoretical concept).</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Source Link</span>
+                <span class="schema-title">◄─── Source Link</span>
                 <p class="schema-desc">Clickable URL linking to the original public dataset or methodology page.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Our Article Link</span>
+                <span class="schema-title">◄─── Our Article Link</span>
                 <p class="schema-desc">Clickable URL pointing directly to our published literature review paper.</p>
             </div>
             <div class="schema-item">
-                <span class="schema-title">Matching Score Bar</span>
+                <span class="schema-title">◄─── Matching Score Bar</span>
                 <p class="schema-desc">Visual percentage showing how well the card fits your filter requests.</p>
             </div>
         </div>
@@ -1245,8 +1268,19 @@ elif st.session_state.step in ['page_3', 'page_4']:
             col_idx = idx % 3
             with cols[col_idx]:
                 score = mrv_row.get('Match_Score', 100)
-                card_html = generate_pokemon_card_html(mrv_row, match_score=score)
+                card_html = generate_pokemon_card_html(mrv_row)
                 st.markdown(card_html, unsafe_allow_html=True)
+                
+                # Render matching score below the card
+                bar_color = "#52B788" if score > 70 else ("#DAB254" if score > 40 else "#EF4444")
+                st.markdown(f"""
+                <div style="font-size: 11.5px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 10px; margin-bottom: 25px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
+                    Matching Score: {score}%
+                    <div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">
+                        <div style="background-color: {bar_color}; width: {score}%; height: 100%;"></div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 # Button to select card for Focus
                 btn_lbl = f"Focus on {mrv_row['ID_MRV']}"
@@ -1266,7 +1300,18 @@ elif st.session_state.step in ['page_3', 'page_4']:
                 col_det_l, col_det_r = st.columns([1.5, 2.5])
                 with col_det_l:
                     focused_score = df_results[df_results['ID_MRV'] == st.session_state.selected_mrv_id].iloc[0].get('Match_Score', 100)
-                    card_html_focused = generate_pokemon_card_html(focused_mrv, match_score=focused_score)
+                    card_html_focused = generate_pokemon_card_html(focused_mrv)
                     st.markdown(card_html_focused, unsafe_allow_html=True)
+                    
+                    # Render matching score below focused card
+                    focused_bar_color = "#52B788" if focused_score > 70 else ("#DAB254" if focused_score > 40 else "#EF4444")
+                    st.markdown(f"""
+                    <div style="font-size: 11.5px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 10px; margin-bottom: 25px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
+                        Matching Score: {focused_score}%
+                        <div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">
+                            <div style="background-color: {focused_bar_color}; width: {focused_score}%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 with col_det_r:
                     render_mrv_details(focused_mrv)
