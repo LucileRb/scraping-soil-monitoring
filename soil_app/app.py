@@ -249,7 +249,27 @@ def generate_pokemon_card_html(mrv_data, clickable=False):
         f'</div>'
     )
     if clickable:
-        html = f'<a href="?focus={mrv_id}" target="_self" style="text-decoration: none; color: inherit; display: block;">{html}</a>'
+        # Build focus url preserving filters to prevent session state resets on page reloads
+        url_params = [f"focus={mrv_id}"]
+        if st.session_state.get('filter_lu_agri'): url_params.append("lu_agri=1")
+        if st.session_state.get('filter_lu_forest'): url_params.append("lu_forest=1")
+        if st.session_state.get('filter_lu_urban'): url_params.append("lu_urban=1")
+        if st.session_state.get('filter_lu_peat'): url_params.append("lu_peat=1")
+        if st.session_state.get('filter_sc_local'): url_params.append("sc_local=1")
+        if st.session_state.get('filter_sc_regional'): url_params.append("sc_regional=1")
+        if st.session_state.get('filter_sc_national'): url_params.append("sc_national=1")
+        if st.session_state.get('filter_sc_continental'): url_params.append("sc_continental=1")
+        if st.session_state.get('filter_sc_global'): url_params.append("sc_global=1")
+        
+        occ = st.session_state.get('filter_occupation', 'All')
+        if occ != 'All': url_params.append(f"occupation={occ}")
+        purp = st.session_state.get('filter_purpose', 'All')
+        if purp != 'All': url_params.append(f"purpose={purp}")
+        drv = st.session_state.get('filter_driver', 'All')
+        if drv != 'All': url_params.append(f"driver={drv}")
+        
+        focus_url = "?" + "&".join(url_params)
+        html = f'<a href="{focus_url}" target="_self" style="text-decoration: none; color: inherit; display: block;">{html}</a>'
     return html
 
 def render_mrv_details(mrv_data):
@@ -1042,6 +1062,21 @@ if "focus" in params:
     mrv_id = val[0] if isinstance(val, list) else val
     st.session_state.selected_mrv_id = mrv_id
     st.session_state.step = 'page_4'
+    
+    # Restore filter states from query parameters to prevent reset
+    st.session_state.filter_lu_agri = "lu_agri" in params
+    st.session_state.filter_lu_forest = "lu_forest" in params
+    st.session_state.filter_lu_urban = "lu_urban" in params
+    st.session_state.filter_lu_peat = "lu_peat" in params
+    st.session_state.filter_sc_local = "sc_local" in params
+    st.session_state.filter_sc_regional = "sc_regional" in params
+    st.session_state.filter_sc_national = "sc_national" in params
+    st.session_state.filter_sc_continental = "sc_continental" in params
+    st.session_state.filter_sc_global = "sc_global" in params
+    
+    st.session_state.filter_occupation = params.get("occupation", ["All"])[0] if isinstance(params.get("occupation"), list) else params.get("occupation", "All")
+    st.session_state.filter_purpose = params.get("purpose", ["All"])[0] if isinstance(params.get("purpose"), list) else params.get("purpose", "All")
+    st.session_state.filter_driver = params.get("driver", ["All"])[0] if isinstance(params.get("driver"), list) else params.get("driver", "All")
 
 defaults = {
     'filter_lu_agri': False,
