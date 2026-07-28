@@ -620,6 +620,9 @@ st.markdown("""
     }
     
     .card-header-name {
+        background: #242526;
+        border-radius: 4px;
+        padding: 4px 10px;
         color: #ef4444 !important;
         font-weight: bold;
         font-size: 13px;
