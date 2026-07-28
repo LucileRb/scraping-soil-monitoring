@@ -998,47 +998,95 @@ if st.session_state.step == 'page_1':
     st.markdown("<h3>Example of MRV card</h3>", unsafe_allow_html=True)
     
     # Render annotated example card
-    col_ann_l, col_ann_c, col_ann_r = st.columns([1, 1.2, 1])
+    st.markdown("""
+    <style>
+        .schema-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1.2fr;
+            gap: 20px;
+            align-items: stretch;
+            margin-top: 20px;
+        }
+        .schema-col-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: right;
+            padding-right: 15px;
+            border-right: 2px dashed #dab254;
+        }
+        .schema-col-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: left;
+            padding-left: 15px;
+            border-left: 2px dashed #dab254;
+        }
+        .schema-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(82, 183, 136, 0.1);
+        }
+        .schema-title {
+            color: #dab254;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .schema-desc {
+            font-size: 11px;
+            color: #E2E8F0;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    with col_ann_l:
+    col_layout_l, col_layout_c, col_layout_r = st.columns([1.2, 1, 1.2])
+    
+    with col_layout_l:
         st.markdown("""
-        <div class="annotation-panel">
-            <div class="annotation-item">
-                <span class="annotation-title">Type of Soil Parameters</span><br>
-                Included in the MRV procedure.
+        <div class="schema-col-left">
+            <div class="schema-item">
+                <span class="schema-title">Type of Soil Parameters</span>
+                <p class="schema-desc">Soil organic carbon, pH, bulk density, etc., measured in-situ or in lab.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Type of Data</span><br>
-                Type of data used for monitoring soil parameters.
+            <div class="schema-item">
+                <span class="schema-title">Type of Data Used</span>
+                <p class="schema-desc">Self-reported farming surveys, satellite imagery, physical soil cores, or models.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Time Range</span><br>
-                Time range between two soil monitoring sessions required for the MRV.
+            <div class="schema-item">
+                <span class="schema-title">Time Range / Frequency</span>
+                <p class="schema-desc">Time gap required between two consecutive soil monitoring sessions.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Methodology Standard</span><br>
-                A methodology standard is required.
+            <div class="schema-item">
+                <span class="schema-title">Methodology Standard</span>
+                <p class="schema-desc">If a recognized methodology standard (ISO, IPCC, Verra) is required.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Land Use</span><br>
-                Type of landuse and landcover where the MRV procedure is applied.
+            <div class="schema-item">
+                <span class="schema-title">Where? Land Use</span>
+                <p class="schema-desc">Cropland, forestry, grasslands, peatlands, or degraded lands.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Geographical Scale</span><br>
-                Type of landuse and landcover where the MRV procedure is applied.
+            <div class="schema-item">
+                <span class="schema-title">Geographical Scale</span>
+                <p class="schema-desc">Application scope: Local, Regional, National, Continental, or Global.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Stakeholder Occupation</span><br>
-                Targeted stakeholders.
+            <div class="schema-item">
+                <span class="schema-title">Who? Targeted Stakeholders</span>
+                <p class="schema-desc">Targeted user role (Farmers, Foresters, NGOs, Project developers, etc.).</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Actions Highlighted</span><br>
-                Action that we want to highlight the effect on soil characteristics.
+            <div class="schema-item">
+                <span class="schema-title">Why? Market Purpose</span>
+                <p class="schema-desc">Target markets like Voluntary Carbon Markets, Compliance, or public incentives.</p>
+            </div>
+            <div class="schema-item">
+                <span class="schema-title">Actions to Implement</span>
+                <p class="schema-desc">Specific soil practices targeting carbon accumulation or restoration.</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-    with col_ann_c:
+    with col_layout_c:
         # Example card content
         example_data = pd.Series({
             'Source': 'Literature (Scopus)',
@@ -1075,52 +1123,52 @@ if st.session_state.step == 'page_1':
         card_html = generate_pokemon_card_html(example_data, match_score=100)
         st.markdown(card_html, unsafe_allow_html=True)
         
-    with col_ann_r:
+    with col_layout_r:
         st.markdown("""
-        <div class="annotation-panel">
-            <div class="annotation-item">
-                <span class="annotation-title">Final Product</span><br>
-                Final product gathering the results.
+        <div class="schema-col-right">
+            <div class="schema-item">
+                <span class="schema-title">Final Product / Format</span>
+                <p class="schema-desc">Reporting output format: Document reports (PDF, Word) or Online dashboards.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Uncertainty</span><br>
-                Statistical methodology used to compute the uncertainty of the results.
+            <div class="schema-item">
+                <span class="schema-title">Uncertainty Computation</span>
+                <p class="schema-desc">Statistical methods used to measure and adjust for results uncertainty.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Threshold</span><br>
-                Methodology used to compute the threshold values.
+            <div class="schema-item">
+                <span class="schema-title">Threshold Values</span>
+                <p class="schema-desc">Baseline/threshold methodology (Fixed vs Relative change).</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Verification Scheme</span><br>
-                Methodology used to verify the results.
+            <div class="schema-item">
+                <span class="schema-title">Verification Scheme</span>
+                <p class="schema-desc">Whether validation is based on actions performed or measured results.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Auditor</span><br>
-                If the person in charge is part of the structure implementing the MRV procedure.
+            <div class="schema-item">
+                <span class="schema-title">Verification Auditor</span>
+                <p class="schema-desc">Validation entity: Internal project auditor or Independent third-party.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Automatization</span><br>
-                If the verification is handled manually or automated.
+            <div class="schema-item">
+                <span class="schema-title">Automatization</span>
+                <p class="schema-desc">If reporting and verification are handled manually or automated.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Open Access</span><br>
-                If the produced data is accessible by external users.
+            <div class="schema-item">
+                <span class="schema-title">Open Access Data</span>
+                <p class="schema-desc">If final project data is shared publicly or remains private/internal.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Implementation Status</span><br>
-                Country/countries where the MRV procedure was applied (implemented) or developed (project).
+            <div class="schema-item">
+                <span class="schema-title">Implementation Status</span>
+                <p class="schema-desc">Geographic coverage and status (Implemented project or theoretical concept).</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Source Link</span><br>
-                Website or article title with its URL link.
+            <div class="schema-item">
+                <span class="schema-title">Source Link</span>
+                <p class="schema-desc">Clickable URL linking to the original public dataset or methodology page.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Our Article Link</span><br>
-                Our article title with its URL link.
+            <div class="schema-item">
+                <span class="schema-title">Our Article Link</span>
+                <p class="schema-desc">Clickable URL pointing directly to our published literature review paper.</p>
             </div>
-            <div class="annotation-item">
-                <span class="annotation-title">Matching Score</span><br>
-                Matching score with your requests.
+            <div class="schema-item">
+                <span class="schema-title">Matching Score Bar</span>
+                <p class="schema-desc">Visual percentage showing how well the card fits your filter requests.</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
