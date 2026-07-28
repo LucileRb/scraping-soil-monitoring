@@ -349,6 +349,147 @@ def render_mrv_details(mrv_data):
             st.write(f"**Auditor:** {mrv_data['Auditor']}")
             st.write(f"**Data sharing:** {mrv_data.get('Data_Sharing', 'No')}")
 
+def generate_modal_html(mrv_data, card_html):
+    mrv_id = mrv_data.get('ID_MRV', 'N/A')
+    mrv_name = mrv_data.get('MRV_Name', 'Framework')
+    pub_title = mrv_data.get('Pub_Title', 'N/A')
+    pub_author = mrv_data.get('Pub_Author', 'Unknown')
+    pub_year = mrv_data.get('Pub_Year', '2025')
+    pub_link = mrv_data.get('Pub_Link', '#')
+    country = mrv_data.get('Country', 'Global')
+    continent = mrv_data.get('Continent', 'N/A')
+    purpose = mrv_data.get('Purpose', 'Not specified')
+    
+    # Active land uses
+    lu_list = []
+    for label, col in [('Agriculture', 'Land_use_Agriculture'), ('Forest', 'Land_use_Forest'), ('Urban', 'Land_use_Urban'), ('Degraded Land', 'Land_use_Degraded_land'), ('Peatland / Wetland', 'Land_use_Peatland_Wetland')]:
+        status = mrv_data.get(col, 'No')
+        color = '#9AE6B4' if status == 'Yes' else '#FEB2B2'
+        bg = '#1C4532' if status == 'Yes' else '#742A2A'
+        lu_list.append(f"<li style='margin-bottom: 4px;'>{label}: <span style='background-color: {bg}; color: {color}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;'>{status}</span></li>")
+    lu_html = "".join(lu_list)
+    
+    # Active scales
+    scale_list = []
+    for label, col in [('Local', 'Scale_Local'), ('Regional', 'Scale_Regional'), ('National', 'Scale_National'), ('Continental', 'Scale_Continental'), ('Global', 'Scale_Global')]:
+        status = mrv_data.get(col, 'No')
+        color = '#9AE6B4' if status == 'Yes' else '#FEB2B2'
+        bg = '#1C4532' if status == 'Yes' else '#742A2A'
+        scale_list.append(f"<li style='margin-bottom: 4px;'>{label}: <span style='background-color: {bg}; color: {color}; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;'>{status}</span></li>")
+    scale_html = "".join(scale_list)
+    
+    # Active drivers
+    drivers = []
+    for drv_lbl, col in DRIVER_MAP.items():
+        if mrv_data.get(col) == 'Yes':
+            drivers.append(drv_lbl)
+    drivers_str = ", ".join(drivers) if drivers else "None"
+    
+    # Active occupations
+    occupations = []
+    for occ_lbl, col in OCCUPATION_MAP.items():
+        if mrv_data.get(col) == 'Yes':
+            occupations.append(occ_lbl)
+    occupations_str = ", ".join(occupations) if occupations else "None"
+    
+    # Monitoring parameters
+    params = []
+    for col in mrv_data.index:
+        if col.startswith('Parameter_') and not col.endswith('_Precision') and col != 'Parameter_Others':
+            if mrv_data.get(col) == 'Yes':
+                label = col.replace('Parameter_Soil_', '').replace('Parameter_', '').replace('_', ' ')
+                params.append(label)
+    params_str = ", ".join(params) if params else "None"
+    
+    # Data types
+    data_types = []
+    for col in mrv_data.index:
+        if col.startswith('Data_') and col != 'Data_Sharing':
+            if mrv_data.get(col) == 'Yes':
+                label = col.replace('Data_', '').replace('_', ' ')
+                data_types.append(label)
+    data_str = ", ".join(data_types) if data_types else "None"
+    
+    # Formats
+    formats = []
+    for col in ['Format_Document', 'Format_Online']:
+        if mrv_data.get(col) == 'Yes':
+            formats.append(col.replace('Format_', ''))
+    formats_str = ", ".join(formats) if formats else "None"
+    
+    # Schemes
+    schemes = []
+    for col in ['Action_based', 'Result_based']:
+        if mrv_data.get(col) == 'Yes':
+            schemes.append(col.replace('_based', '-based'))
+    schemes_str = ", ".join(schemes) if schemes else "None"
+    
+    html = f"""
+    <div class="modal-overlay">
+        <div class="modal-content-wrapper">
+            <a href="?" target="_self" class="modal-close-link">&times;</a>
+            <div class="modal-grid">
+                <div class="modal-card-col">
+                    {card_html}
+                </div>
+                <div class="modal-details-col">
+                    <h2 style="color: #dab254; margin-top: 0; font-size: 24px; border-bottom: 2px solid #dab254; padding-bottom: 10px; font-family: 'Outfit', sans-serif;">
+                        {mrv_name} ({mrv_id}) Details
+                    </h2>
+                    <div class="modal-tabs-content" style="font-family: 'Outfit', sans-serif; text-align: left;">
+                        <h4 style="color: #52B788; margin-top: 15px; margin-bottom: 5px;">📝 General Information</h4>
+                        <ul style="list-style-type: none; padding-left: 0; font-size: 13px; line-height: 1.6;">
+                            <li><b>Publication/Source:</b> {pub_title}</li>
+                            <li><b>Author/Platform:</b> {pub_author} ({pub_year})</li>
+                            <li><b>Location:</b> {country} ({continent})</li>
+                            <li><b>Link:</b> <a href="{pub_link}" target="_blank" style="color: #dab254; text-decoration: underline;">Access Original Source</a></li>
+                        </ul>
+                        
+                        <h4 style="color: #52B788; margin-top: 15px; margin-bottom: 5px;">🌍 Context & Stakeholders</h4>
+                        <div style="display: flex; gap: 40px; font-size: 13px;">
+                            <div>
+                                <b>Land Uses:</b>
+                                <ul style="list-style-type: none; padding-left: 0; margin-top: 5px; line-height: 1.5;">
+                                    {lu_html}
+                                </ul>
+                            </div>
+                            <div>
+                                <b>Application Scales:</b>
+                                <ul style="list-style-type: none; padding-left: 0; margin-top: 5px; line-height: 1.5;">
+                                    {scale_html}
+                                </ul>
+                            </div>
+                        </div>
+                        <ul style="list-style-type: none; padding-left: 0; font-size: 13px; line-height: 1.6; margin-top: 10px;">
+                            <li><b>Targeted Stakeholders:</b> {occupations_str}</li>
+                            <li><b>Market Purpose:</b> {purpose}</li>
+                            <li><b>Actions/Drivers:</b> {drivers_str}</li>
+                        </ul>
+                        
+                        <h4 style="color: #52B788; margin-top: 15px; margin-bottom: 5px;">🔬 Monitoring Component</h4>
+                        <ul style="list-style-type: none; padding-left: 0; font-size: 13px; line-height: 1.6;">
+                            <li><b>Parameters:</b> {params_str}</li>
+                            <li><b>Data Types:</b> {data_str}</li>
+                            <li><b>Frequency:</b> {mrv_data.get("Monitoring_frequency", "N/A")}</li>
+                            <li><b>Standards Use:</b> {mrv_data.get("Methodology_Standard", "N/A")}</li>
+                        </ul>
+                        
+                        <h4 style="color: #52B788; margin-top: 15px; margin-bottom: 5px;">📊 Reporting & Verification</h4>
+                        <ul style="list-style-type: none; padding-left: 0; font-size: 13px; line-height: 1.6;">
+                            <li><b>Reporting Format:</b> {formats_str}</li>
+                            <li><b>Uncertainty Computation:</b> {mrv_data.get("Uncertainty", "N/A")}</li>
+                            <li><b>Threshold Values:</b> {mrv_data.get("Threshold", "N/A")}</li>
+                            <li><b>Verification Scheme:</b> {schemes_str}</li>
+                            <li><b>Auditor Type:</b> {mrv_data.get("Auditor", "N/A")}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """
+    return html
+
 # Page config
 st.set_page_config(
     page_title='Soil Monitoring & Decision Tool (MRV)',
@@ -603,6 +744,13 @@ st.markdown("""
         margin: 0 auto;
         font-family: 'Outfit', sans-serif !important;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    
+    .mrv-custom-card:hover {
+        transform: translateY(-10px) scale(1.03) rotate(0.5deg);
+        box-shadow: 0 25px 45px rgba(0,0,0,0.8), 0 0 20px rgba(218,178,84,0.3);
+        border-color: #dab254;
     }
     
     .card-header-custom {
@@ -784,6 +932,66 @@ st.markdown("""
         color: #dab254;
         font-weight: 600;
         font-size: 14px;
+    
+    /* Full-screen Modal overlay styling for focused card details */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(10, 16, 13, 0.88);
+        backdrop-filter: blur(7px);
+        z-index: 999999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+    }
+    
+    .modal-content-wrapper {
+        background: #111e16;
+        border: 3.5px solid #dab254;
+        border-radius: 18px;
+        width: 90%;
+        max-width: 850px;
+        padding: 25px;
+        position: relative;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+        box-sizing: border-box;
+    }
+    
+    .modal-close-link {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 32px;
+        color: #dab254 !important;
+        text-decoration: none !important;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+    
+    .modal-close-link:hover {
+        color: #ff5555 !important;
+    }
+    
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 25px;
+        align-items: start;
+    }
+    
+    .modal-card-col {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .modal-details-col {
+        max-height: 75vh;
+        overflow-y: auto;
+        padding-right: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1248,29 +1456,11 @@ elif st.session_state.step in ['page_3', 'page_4']:
                 """, unsafe_allow_html=True)
                 st.markdown("<div style='margin-bottom: 75px;'></div>", unsafe_allow_html=True)
 
-        # Page 4: Detailed view of focus card
+        # Page 4: Detailed view of focus card in a full-page modal overlay
         if st.session_state.step == 'page_4' and st.session_state.selected_mrv_id:
             focused_rows = combined_df[combined_df['ID_MRV'] == st.session_state.selected_mrv_id]
             if not focused_rows.empty:
                 focused_mrv = focused_rows.iloc[0]
-                st.divider()
-                st.markdown(f"<h2>Focus on {focused_mrv['MRV_Name']} ({focused_mrv['ID_MRV']}) :</h2>", unsafe_allow_html=True)
-                
-                col_det_l, col_det_r = st.columns([1.5, 2.5])
-                with col_det_l:
-                    focused_score = df_results[df_results['ID_MRV'] == st.session_state.selected_mrv_id].iloc[0].get('Match_Score', 100)
-                    card_html_focused = generate_pokemon_card_html(focused_mrv)
-                    st.markdown(card_html_focused, unsafe_allow_html=True)
-                    
-                    # Render matching score below focused card
-                    focused_bar_color = "#52B788" if focused_score > 70 else ("#DAB254" if focused_score > 40 else "#EF4444")
-                    st.markdown(f"""
-                    <div style="font-size: 11.5px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 10px; margin-bottom: 25px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
-                        Matching Score: {focused_score}%
-                        <div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">
-                            <div style="background-color: {focused_bar_color}; width: {focused_score}%; height: 100%;"></div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_det_r:
-                    render_mrv_details(focused_mrv)
+                card_html_focused = generate_pokemon_card_html(focused_mrv)
+                modal_html = generate_modal_html(focused_mrv, card_html_focused)
+                st.markdown(modal_html, unsafe_allow_html=True)
