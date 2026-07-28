@@ -179,6 +179,10 @@ def generate_pokemon_card_html(mrv_data, clickable=False):
     author = mrv_data.get('Pub_Author', 'Unknown')
     year = mrv_data.get('Pub_Year', '2025')
     country = mrv_data.get('Country', 'Global')
+    if isinstance(country, str) and ',' in country:
+        countries = [c.strip() for c in country.split(',') if c.strip()]
+        if len(countries) > 3:
+            country = ", ".join(countries[:3]) + ", ..."
     purpose = mrv_data.get('Purpose', 'Not specified')
     pub_link = mrv_data.get('Pub_Link', '#')
     
