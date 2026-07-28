@@ -823,9 +823,16 @@ OCCUPATION_MAP = {
 if 'step' not in st.session_state:
     st.session_state.step = 'page_1'
 
-# Handle query parameters for clickable cards
-if "focus" in st.query_params:
-    st.session_state.selected_mrv_id = st.query_params["focus"]
+# Handle query parameters for clickable cards (compatible with older Streamlit versions)
+try:
+    params = st.query_params
+except AttributeError:
+    params = st.experimental_get_query_params()
+
+if "focus" in params:
+    val = params["focus"]
+    mrv_id = val[0] if isinstance(val, list) else val
+    st.session_state.selected_mrv_id = mrv_id
     st.session_state.step = 'page_4'
 
 defaults = {
@@ -954,7 +961,10 @@ if st.session_state.step == 'page_1':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Let's start", use_container_width=True):
-            st.query_params.clear()
+            try:
+                st.query_params.clear()
+            except AttributeError:
+                st.experimental_set_query_params()
             st.session_state.step = 'page_2'
             st.rerun()
             
@@ -1197,7 +1207,10 @@ elif st.session_state.step == 'page_2':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Get the MRV procedures", use_container_width=True):
-            st.query_params.clear()
+            try:
+                st.query_params.clear()
+            except AttributeError:
+                st.experimental_set_query_params()
             st.session_state.step = 'page_3'
             st.rerun()
 
