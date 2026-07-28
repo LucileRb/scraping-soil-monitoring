@@ -1432,6 +1432,35 @@ elif st.session_state.step in ['page_3', 'page_4']:
     if df_results.empty:
         st.info("No MRV procedures matched your strict filters. Try switching to 'Matching Score' mode.")
     else:
+        # Page 4: Detailed view of focus card at the top of results grid
+        if st.session_state.step == 'page_4' and st.session_state.selected_mrv_id:
+            focused_rows = combined_df[combined_df['ID_MRV'] == st.session_state.selected_mrv_id]
+            if not focused_rows.empty:
+                focused_mrv = focused_rows.iloc[0]
+                
+                st.markdown(f"<div style='border: 2px solid #dab254; background-color: #14221A; border-radius: 12px; padding: 25px; margin-bottom: 40px;'>", unsafe_allow_html=True)
+                st.markdown(f"<h2>Focus on {focused_mrv['MRV_Name']} ({focused_mrv['ID_MRV']}) :</h2>", unsafe_allow_html=True)
+                
+                col_det_l, col_det_r = st.columns([1.2, 2.5])
+                with col_det_l:
+                    card_html_focused = generate_pokemon_card_html(focused_mrv)
+                    st.markdown(card_html_focused, unsafe_allow_html=True)
+                    
+                    # Close button below the card
+                    if st.button("Close details ✕", use_container_width=True):
+                        try:
+                            st.query_params.clear()
+                        except AttributeError:
+                            st.experimental_set_query_params()
+                        st.session_state.selected_mrv_id = None
+                        st.session_state.step = 'page_3'
+                        st.rerun()
+                        
+                with col_det_r:
+                    render_mrv_details(focused_mrv)
+                st.markdown("</div>", unsafe_allow_html=True)
+                st.divider()
+
         # Display top cards in a 3-column grid
         # Limit to top 15 results for performance, let user browse via scroll
         top_n = min(15, len(df_results))
@@ -1455,12 +1484,3 @@ elif st.session_state.step in ['page_3', 'page_4']:
                 </div>
                 """, unsafe_allow_html=True)
                 st.markdown("<div style='margin-bottom: 75px;'></div>", unsafe_allow_html=True)
-
-        # Page 4: Detailed view of focus card in a full-page modal overlay
-        if st.session_state.step == 'page_4' and st.session_state.selected_mrv_id:
-            focused_rows = combined_df[combined_df['ID_MRV'] == st.session_state.selected_mrv_id]
-            if not focused_rows.empty:
-                focused_mrv = focused_rows.iloc[0]
-                card_html_focused = generate_pokemon_card_html(focused_mrv)
-                modal_html = generate_modal_html(focused_mrv, card_html_focused)
-                st.markdown(modal_html, unsafe_allow_html=True)
