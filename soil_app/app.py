@@ -98,7 +98,7 @@ def translate_val(val):
     }
     return mapping.get(str(val), val)
 
-def generate_pokemon_card_html(mrv_data, match_score=100):
+def generate_pokemon_card_html(mrv_data, clickable=False):
     if isinstance(mrv_data, dict):
         mrv_data = pd.Series(mrv_data)
         
@@ -248,6 +248,8 @@ def generate_pokemon_card_html(mrv_data, match_score=100):
         f'</div>'
         f'</div>'
     )
+    if clickable:
+        html = f'<a href="?focus={mrv_id}" target="_self" style="text-decoration: none; color: inherit; display: block;">{html}</a>'
     return html
 
 def render_mrv_details(mrv_data):
@@ -821,6 +823,11 @@ OCCUPATION_MAP = {
 if 'step' not in st.session_state:
     st.session_state.step = 'page_1'
 
+# Handle query parameters for clickable cards
+if "focus" in st.query_params:
+    st.session_state.selected_mrv_id = st.query_params["focus"]
+    st.session_state.step = 'page_4'
+
 defaults = {
     'filter_lu_agri': False,
     'filter_lu_forest': False,
@@ -947,6 +954,7 @@ if st.session_state.step == 'page_1':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Let's start", use_container_width=True):
+            st.query_params.clear()
             st.session_state.step = 'page_2'
             st.rerun()
             
@@ -1189,6 +1197,7 @@ elif st.session_state.step == 'page_2':
     col_btn_l, col_btn_c, col_btn_r = st.columns([2, 1, 2])
     with col_btn_c:
         if st.button("Get the MRV procedures", use_container_width=True):
+            st.query_params.clear()
             st.session_state.step = 'page_3'
             st.rerun()
 
@@ -1211,27 +1220,20 @@ elif st.session_state.step in ['page_3', 'page_4']:
             col_idx = idx % 3
             with cols[col_idx]:
                 score = mrv_row.get('Match_Score', 100)
-                card_html = generate_pokemon_card_html(mrv_row)
+                card_html = generate_pokemon_card_html(mrv_row, clickable=True)
                 st.markdown(card_html, unsafe_allow_html=True)
                 
                 # Render matching score below the card
                 bar_color = "#52B788" if score > 70 else ("#DAB254" if score > 40 else "#EF4444")
                 st.markdown(f"""
-                <div style="font-size: 11.5px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 10px; margin-bottom: 25px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
+                <div style="font-size: 11.5px; text-align: center; font-weight: bold; color: #ffffff; margin-top: 10px; margin-bottom: 15px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
                     Matching Score: {score}%
                     <div style="background-color: #24352C; border-radius: 4px; height: 6px; width: 100%; margin-top: 4px; overflow: hidden;">
                         <div style="background-color: {bar_color}; width: {score}%; height: 100%;"></div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
-                
-                # Button to select card for Focus
-                btn_lbl = f"Focus on {mrv_row['ID_MRV']}"
-                if st.button(btn_lbl, key=f"btn_focus_{mrv_row['ID_MRV']}", use_container_width=True):
-                    st.session_state.selected_mrv_id = mrv_row['ID_MRV']
-                    st.session_state.step = 'page_4'
-                    st.rerun()
-                st.markdown("<div style='margin-bottom: 55px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='margin-bottom: 75px;'></div>", unsafe_allow_html=True)
 
         # Page 4: Detailed view of focus card
         if st.session_state.step == 'page_4' and st.session_state.selected_mrv_id:
