@@ -1231,6 +1231,7 @@ elif st.session_state.step in ['page_3', 'page_4']:
                     st.session_state.selected_mrv_id = mrv_row['ID_MRV']
                     st.session_state.step = 'page_4'
                     st.rerun()
+                st.markdown("<div style='margin-bottom: 55px;'></div>", unsafe_allow_html=True)
 
         # Page 4: Detailed view of focus card
         if st.session_state.step == 'page_4' and st.session_state.selected_mrv_id:
