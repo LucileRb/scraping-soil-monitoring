@@ -98,6 +98,39 @@ def translate_val(val):
     }
     return mapping.get(str(val), val)
 
+def format_country_display(country, continent):
+    """Returns 'Continent (N countries)' when the country list is long, otherwise the raw value."""
+    if not isinstance(country, str) or not country.strip() or country.strip().lower() in ('nan', 'n/a', 'global', 'unknown'):
+        return country
+    if len(country) <= 60:
+        return country
+    # Known multi-word country names — replace before counting to avoid overcounting words like 'and'
+    import re
+    MULTI_WORD = [
+        'Bosnia and Herzegovina', 'North Macedonia', 'San Marino', 'Costa Rica',
+        'El Salvador', 'Dominican Republic', 'French Guiana', 'Puerto Rico',
+        'Saint-Barthélemy', 'Saint-Martin', 'South Africa', 'New Zealand',
+        'South Korea', 'North Korea', 'United States', 'United Kingdom',
+        'Burkina Faso', 'Ivory Coast', 'Sierra Leone', 'South Sudan',
+        'Sri Lanka', 'Cape Verde', 'Papua New Guinea', 'Equatorial Guinea',
+        'Central African Republic', 'Trinidad and Tobago',
+    ]
+    s = country
+    n_multi = 0
+    for mw in MULTI_WORD:
+        if mw in s:
+            s = s.replace(mw, '__MW__')
+            n_multi += 1
+    # Remaining single-word countries start with a capital letter
+    single = [w for w in re.split(r'[\s,]+', s) if w.strip() and w[0].isupper() and w != '__MW__']
+    n_countries = n_multi + len(single)
+    # Format continent label
+    cont = continent if isinstance(continent, str) and continent.strip() not in ('', 'nan', 'N/A') else ''
+    cont_clean = cont.replace('_', ' & ').strip()
+    if cont_clean:
+        return f"{cont_clean} ({n_countries} countries)"
+    return f"{n_countries} countries"
+
 def generate_pokemon_card_html(mrv_data, clickable=False):
     if isinstance(mrv_data, dict):
         mrv_data = pd.Series(mrv_data)
@@ -179,10 +212,8 @@ def generate_pokemon_card_html(mrv_data, clickable=False):
     author = mrv_data.get('Pub_Author', 'Unknown')
     year = mrv_data.get('Pub_Year', '2025')
     country = mrv_data.get('Country', 'Global')
-    if isinstance(country, str) and ',' in country:
-        countries = [c.strip() for c in country.split(',') if c.strip()]
-        if len(countries) > 3:
-            country = ", ".join(countries[:3]) + ", ..."
+    continent = mrv_data.get('Continent', '')
+    country = format_country_display(country, continent)
     purpose = mrv_data.get('Purpose', 'Not specified')
     pub_link = mrv_data.get('Pub_Link', '#')
     
@@ -358,8 +389,9 @@ def generate_modal_html(mrv_data, card_html):
     pub_author = mrv_data.get('Pub_Author', 'Unknown')
     pub_year = mrv_data.get('Pub_Year', '2025')
     pub_link = mrv_data.get('Pub_Link', '#')
-    country = mrv_data.get('Country', 'Global')
+    country_raw = mrv_data.get('Country', 'Global')
     continent = mrv_data.get('Continent', 'N/A')
+    country = format_country_display(country_raw, continent)
     purpose = mrv_data.get('Purpose', 'Not specified').replace('_', ' ')
     
     # Active land uses
@@ -443,7 +475,7 @@ def generate_modal_html(mrv_data, card_html):
                         <ul style="list-style-type: none; padding-left: 0; font-size: 13px; line-height: 1.6;">
                             <li><b>Publication/Source:</b> {pub_title}</li>
                             <li><b>Author/Platform:</b> {pub_author} ({pub_year})</li>
-                            <li><b>Location:</b> {country} ({continent})</li>
+                            <li><b>Location:</b> {country}</li>
                             <li><b>Link:</b> <a href="{pub_link}" target="_blank" style="color: #dab254; text-decoration: underline;">Access Original Source</a></li>
                         </ul>
                         
@@ -517,6 +549,7 @@ plt.rcParams.update({
 def load_and_clean_data():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data')
+    new_data_dir = os.path.join(base_dir, 'data', 'new_data')
     
     variables_path = os.path.join(data_dir, 'variables.json')
     variables = []
@@ -524,15 +557,15 @@ def load_and_clean_data():
         with open(variables_path, 'r', encoding='utf-8') as f:
             variables = json.load(f)
             
-    txt_files = ['db_articles-11-04-26.txt', 'db_webscraping-27-04-26.txt', 'db_AI-13-04-26.txt']
+    txt_files = ['db_DT_MRV_articles_02-09-26.csv', 'db_DT_MRV_webscraping_02-09-26.csv', 'db_DT_MRV_AI_02-09-26.csv']
     dfs = []
     
     for fn in txt_files:
-        path = os.path.join(data_dir, fn)
+        path = os.path.join(new_data_dir, fn)
         if not os.path.exists(path):
             continue
             
-        df = pd.read_csv(path, sep='\t')
+        df = pd.read_csv(path, sep=',')
         df.columns = [c.strip() for c in df.columns]
         
         if 'In_Scope' in df.columns:
@@ -540,9 +573,9 @@ def load_and_clean_data():
             df_yes = df[df['In_Scope_Clean'] == 'yes'].copy()
             df_yes['Source_File'] = fn
             
-            if fn == 'db_articles-11-04-26.txt':
+            if fn == 'db_DT_MRV_articles_02-09-26.csv':
                 df_yes['Source'] = 'Literature (Scopus)'
-            elif fn == 'db_webscraping-27-04-26.txt':
+            elif fn == 'db_DT_MRV_webscraping_02-09-26.csv':
                 df_yes['Source'] = 'Webscraping'
             else:
                 df_yes['Source'] = 'AI Search'
