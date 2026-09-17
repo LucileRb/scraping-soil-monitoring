@@ -99,12 +99,10 @@ def translate_val(val):
     return mapping.get(str(val), val)
 
 def format_country_display(country, continent):
-    """Returns 'Continent (N countries)' when the country list is long, otherwise the raw value."""
+    """Returns comma-separated countries, or 'Continent (N countries)' when the list is long."""
     if not isinstance(country, str) or not country.strip() or country.strip().lower() in ('nan', 'n/a', 'global', 'unknown'):
         return country
-    if len(country) <= 60:
-        return country
-    # Known multi-word country names — replace before counting to avoid overcounting words like 'and'
+    # Known multi-word country names — must be tokenised before splitting on spaces
     import re
     MULTI_WORD = [
         'Bosnia and Herzegovina', 'North Macedonia', 'San Marino', 'Costa Rica',
@@ -115,21 +113,27 @@ def format_country_display(country, continent):
         'Sri Lanka', 'Cape Verde', 'Papua New Guinea', 'Equatorial Guinea',
         'Central African Republic', 'Trinidad and Tobago',
     ]
+    # Replace multi-word names with placeholders, then split remaining tokens
     s = country
-    n_multi = 0
-    for mw in MULTI_WORD:
+    placeholders = {}
+    for i, mw in enumerate(MULTI_WORD):
+        token = f'__MW{i}__'
         if mw in s:
-            s = s.replace(mw, '__MW__')
-            n_multi += 1
-    # Remaining single-word countries start with a capital letter
-    single = [w for w in re.split(r'[\s,]+', s) if w.strip() and w[0].isupper() and w != '__MW__']
-    n_countries = n_multi + len(single)
-    # Format continent label
-    cont = continent if isinstance(continent, str) and continent.strip() not in ('', 'nan', 'N/A') else ''
-    cont_clean = cont.replace('_', ' & ').strip()
-    if cont_clean:
-        return f"{cont_clean} ({n_countries} countries)"
-    return f"{n_countries} countries"
+            s = s.replace(mw, token)
+            placeholders[token] = mw
+    # Split on spaces/commas and rebuild the ordered country list
+    tokens = [w.strip() for w in re.split(r'[\s,]+', s) if w.strip()]
+    country_list = [placeholders.get(t, t) for t in tokens if t[0].isupper() or t.startswith('__MW')]
+    n_countries = len(country_list)
+    # Long list → summarise as "Continent (N countries)"
+    if n_countries > 4:
+        cont = continent if isinstance(continent, str) and continent.strip() not in ('', 'nan', 'N/A') else ''
+        cont_clean = cont.replace('_', ' & ').strip()
+        if cont_clean:
+            return f"{cont_clean} ({n_countries} countries)"
+        return f"{n_countries} countries"
+    # Short list → comma-separated
+    return ', '.join(country_list)
 
 def generate_pokemon_card_html(mrv_data, clickable=False):
     if isinstance(mrv_data, dict):
