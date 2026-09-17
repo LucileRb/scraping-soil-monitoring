@@ -1,6 +1,6 @@
-# Soil Monitoring & Web Scraping Pipeline (MRV)
+# MRV Procedures & Web Scraping Pipeline (MRV)
 
-This repository contains a **Soil Monitoring & Decision Tool** Streamlit application and a **Web Scraping Pipeline** designed to monitor and evaluate **Monitoring, Reporting, and Verification (MRV)** frameworks applied to soil health and carbon sequestration.
+This repository contains a **MRV Procedures & Decision Tool** Streamlit application and a **Web Scraping Pipeline** designed to monitor and evaluate **Monitoring, Reporting, and Verification (MRV)** frameworks applied to soil health and carbon sequestration.
 
 ---
 

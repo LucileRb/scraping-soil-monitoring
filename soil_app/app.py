@@ -530,7 +530,7 @@ def generate_modal_html(mrv_data, card_html):
 
 # Page config
 st.set_page_config(
-    page_title='Soil Monitoring & Decision Tool (MRV)',
+    page_title='MRV Procedures & Decision Tool (MRV)',
     page_icon='🌱',
     layout='wide'
 )
@@ -1290,7 +1290,7 @@ if st.session_state.step == 'page_1':
             </div>
             <div class="schema-item">
                 <span class="schema-title">Time Range / Frequency ───►</span>
-                <p class="schema-desc">Time gap required between two consecutive soil monitoring sessions.</p>
+                <p class="schema-desc">Time gap required between two consecutive MRV procedures sessions.</p>
             </div>
             <div class="schema-item">
                 <span class="schema-title">Methodology Standard ───►</span>
